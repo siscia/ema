@@ -87,19 +87,14 @@
     (map (fn [definition-map]
            [{:method :any
              :route (:name definition-map)
-             :resource
-             ;; (fn [r] {:status 200
-             ;;          :headers {"Content-Type" "text/plain"}
-             ;;          :body (do (println "ok")
-             ;;                   (str r))})} 
-             (resource (collection-entries definition-map))}
+             :resource (resource (collection-entries definition-map))}
             {:method :any
              :route (:name definition-map)
              :params :id
              :resource (fn [{:keys [route-params] :as req}]
                          (println req)
                          (
-                          (resource (item-entries definition-map (:id params)))
+                          (resource (item-entries definition-map (:id route-params)))
                           req))}])
          definition-maps)))
 
