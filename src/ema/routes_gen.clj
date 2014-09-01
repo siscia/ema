@@ -1,6 +1,8 @@
 (ns ema.routes-gen
-  (:require [liberator.core :refer [resource]]
-            [bidi.bidi :refer [make-handler]]))
+  (:require [ema.implementation :refer [generate-handler]]
+            [liberator.core :refer [resource]]
+            [bidi.bidi :refer [make-handler]]
+            [ring.middleware.multipart-params :refer [wrap-multipart-params]]))
 
 (defn generate-single-route [ast]
   (if (:params ast)
@@ -8,9 +10,14 @@
     {(:route ast) (:resource ast)}))
 
 (defn generate-bidi-routes [asts-list]
-  (cons "/" (map (fn [asts]
-                   (apply merge (map generate-single-route asts)))
-                 asts-list)))
+  ;(map generate-single-route asts-list))
+  ["/" (apply merge (map generate-single-route asts-list))])
 
 (defn generate-bidi-handler [asts-list]
-  (make-handler (generate-bidi-routes asts-list)))
+  (-> asts-list :asts
+      generate-bidi-routes
+      make-handler
+      wrap-multipart-params))
+
+(defmethod generate-handler :bidi [asts-list]
+  (generate-bidi-handler asts-list))
