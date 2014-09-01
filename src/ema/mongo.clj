@@ -4,7 +4,8 @@
             [cheshire.core :refer [parse-string generate-string]]
             [cheshire.generate :refer [add-encoder encode-str]]
             [clojure.stacktrace :refer [e]]
-            [liberator.core :refer [resource]])
+            [liberator.core :refer [resource]]
+            [ema.implementation :refer [generate-asts]])
   (:import org.bson.types.ObjectId))
 
 (add-encoder org.bson.types.ObjectId encode-str)
@@ -80,23 +81,43 @@
 
 (defn generate-definition-map [m]
   (map (fn [collection-map]
-         (merge (dissoc m :collections) collection-map)) (:collections m)))
+         (-> (merge (dissoc m :collections) collection-map)
+             (assoc :uri (str (:uri m) "/" (:name collection-map)))))
+       (:collections m)))
 
-(defn generate-asts [m]
+(defn item-entries-value
+  [definition-map]
+  {:method :any
+   :route (:name definition-map)
+   :params :id
+   :resource (fn [{:keys [route-params] :as req}]
+               (println req)
+               ((resource (item-entries definition-map (:id route-params)))
+                req))})
+
+(defn collection-entries-value
+  [definition-map]
+  {:method :any
+   :route (:name definition-map)
+   :resource (resource (collection-entries definition-map))})
+
+(defn reducing-f [definition-map]
+  (fn [v {:keys [predicate value]}]
+    (if (predicate definition-map)
+      (conj v (value definition-map))
+      v)))
+
+(defn definition-map-2-ast [definition-map]
+  (reduce (reducing-f definition-map)
+          [] [{:predicate (fn [dm] (contains? dm :item-entries))
+               :value item-entries-value}
+              {:predicate (fn [dm] (contains? dm :collection-entries))
+               :value collection-entries-value}]))
+
+(defn generate-mongo-asts [m]
   (let [definition-maps (generate-definition-map m)]
-    (map (fn [definition-map]
-           [{:method :any
-             :route (:name definition-map)
-             :resource (resource (collection-entries definition-map))}
-            {:method :any
-             :route (:name definition-map)
-             :params :id
-             :resource (fn [{:keys [route-params] :as req}]
-                         (println req)
-                         (
-                          (resource (item-entries definition-map (:id route-params)))
-                          req))}])
-         definition-maps)))
+    {:handler (:handler m)
+     :asts (apply concat (map definition-map-2-ast definition-maps))}))
 
-(defn generete-routes [asts]
-  ())
+(defmethod generate-asts :mongo [m]
+  (generate-mongo-asts m))
