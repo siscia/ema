@@ -10,7 +10,8 @@
             [ring.middleware.multipart-params :refer [wrap-multipart-params]]))
 
 (def example
-  (generate-handler (generate-asts possible)))
+  (generate-handler
+   (generate-asts possible)))
 
 (def app
   (-> example

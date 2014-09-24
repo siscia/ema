@@ -10,7 +10,6 @@
     {(:route ast) (:resource ast)}))
 
 (defn generate-bidi-routes [asts-list]
-  ;(map generate-single-route asts-list))
   ["/" (apply merge (map generate-single-route asts-list))])
 
 (defn generate-bidi-handler [asts-list]

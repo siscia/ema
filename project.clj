@@ -6,6 +6,7 @@
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [liberator "0.12.1"]
                  [http-kit "2.1.16"]
+                 [org.clojure/core.typed "0.2.68"]
                  [cheshire "5.3.1"]
                  [ring "1.3.0"]
                  [ring/ring-defaults "0.1.1"]

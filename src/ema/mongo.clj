@@ -81,7 +81,9 @@
 
 (defn generate-definition-map [m]
   (map (fn [collection-map]
-         (-> (merge (dissoc m :collections) collection-map)
+         (-> m
+             (dissoc :collections)
+             (merge collection-map)
              (assoc :uri (str (:uri m) "/" (:name collection-map)))))
        (:collections m)))
 

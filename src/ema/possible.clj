@@ -1,16 +1,23 @@
-(ns ema.possible)
+(ns ema.possible
+  (:require [clojure.core.typed :as t]
+            [ema.type :refer [EntryMap]]))
 
+(t/ann possible EntryMap)
 (def possible
   {:key :mongo
    :handler :bidi
    :uri "mongodb://localhost:27017"
-   :collections [{:name "user"
+   :collections [{:key :mongo
+                  :name "user"
                   :authentication :second
-                  :item-entries [:get :put :patch :delete]
+                  :item-entries [:get :patch :delete]
                   :collection-entries [:post :get]}
-                 {:name "sessione"
+                 {:key :mongo
+                  :name "sessione"
+                  :item-entries [:put]
                   :collection-entries [:get :post]}]
-   :authentication {:firts {:key :rest-call
-                            :uri "https://www.auth.com/nvfir"}
-                    :second {:key :mongo-auth
-                             }}})
+   :authentication {:second {:key :basic
+                            :uri "https://www.auth.com/nvfir"
+                            :collection "user"
+                            :username "username"
+                            :password "password"}}})
