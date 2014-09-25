@@ -13,10 +13,10 @@
   ["/" (apply merge (map generate-single-route asts-list))])
 
 (defn generate-bidi-handler [asts-list]
-  (-> asts-list :asts
+  (-> asts-list
       generate-bidi-routes
       make-handler
       wrap-multipart-params))
 
 (defmethod generate-handler :bidi [asts-list]
-  (generate-bidi-handler asts-list))
+  (generate-bidi-handler (:asts asts-list)))

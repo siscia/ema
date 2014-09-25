@@ -5,7 +5,7 @@
             [cheshire.generate :refer [add-encoder encode-str]]
             [clojure.stacktrace :refer [e]]
             [liberator.core :refer [resource]]
-            [ema.implementation :refer [generate-asts]])
+            [ema.implementation :refer [generate-asts generate-resource-definition custom-resource-definition]])
   (:import org.bson.types.ObjectId))
 
 (add-encoder org.bson.types.ObjectId encode-str)
@@ -79,14 +79,6 @@
                      :delete {:message "Eliminated resource"
                               :resource (generate-string (::resource ctx))}))}))
 
-(defn generate-definition-map [m]
-  (map (fn [collection-map]
-         (-> m
-             (dissoc :collections)
-             (merge collection-map)
-             (assoc :uri (str (:uri m) "/" (:name collection-map)))))
-       (:collections m)))
-
 (defn item-entries-value
   [definition-map]
   {:method :any
@@ -106,7 +98,7 @@
 (defn reducing-f [definition-map]
   (fn [v {:keys [predicate value]}]
     (if (predicate definition-map)
-      (conj v (value definition-map))
+      (conj v (merge definition-map (value definition-map)))
       v)))
 
 (defn definition-map-2-ast [definition-map]
@@ -117,9 +109,12 @@
                :value collection-entries-value}]))
 
 (defn generate-mongo-asts [m]
-  (let [definition-maps (generate-definition-map m)]
-    {:handler (:handler m)
-     :asts (apply concat (map definition-map-2-ast definition-maps))}))
+  (let [definition-maps (generate-resource-definition m)]
+    (flatten (map definition-map-2-ast definition-maps))))
+
+(defmethod custom-resource-definition :mongo [coll _]
+  (assoc coll :uri (str (:uri coll) "/" (:name coll))))
 
 (defmethod generate-asts :mongo [m]
-  (generate-mongo-asts m))
+  {:handler :bidi
+   :asts (generate-mongo-asts m)})

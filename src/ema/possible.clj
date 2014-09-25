@@ -17,7 +17,7 @@
                   :item-entries [:put]
                   :collection-entries [:get :post]}]
    :authentication {:second {:key :basic
-                            :uri "https://www.auth.com/nvfir"
-                            :collection "user"
-                            :username "username"
-                            :password "password"}}})
+                             :uri "https://www.auth.com/nvfir"
+                             :collection "user"
+                             :username "username"
+                             :password "password"}}})

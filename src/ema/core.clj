@@ -18,3 +18,9 @@
       (wrap-trace :header :ui)
       wrap-multipart-params
       ))
+
+(defn ema [m]
+  (->> m
+      generate-asts
+      generate-handler
+      wrap-multipart-params))
