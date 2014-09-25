@@ -24,7 +24,7 @@
 ;; (t/ann inject-basic-key
 ;;        (t/All [x y] [(t/Map x y) (t/Map x y) -> (t/Map x y)]))
 (defn inject-basic-key [coll entry-map]
-  (merge (select-keys entry-map [:key :handler :uri]) coll))
+  (merge (select-keys entry-map [:key :handler :uri :database]) coll))
 
 ;;(t/ann define-resource [EntryMap -> (t/Fn [PreResourceDefinition -> ResourceDefinition])])
 (defn define-resource [entry-map]

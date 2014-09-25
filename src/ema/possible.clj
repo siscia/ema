@@ -7,13 +7,15 @@
   {:key :mongo
    :handler :bidi
    :uri "mongodb://localhost:27017"
+   :database "ema"
    :collections [{:key :mongo
                   :name "user"
                   :authentication :second
                   :item-entries [:get :patch :delete]
                   :collection-entries [:post :get]}
                  {:key :mongo
-                  :name "sessione"
+                  :database "test"
+                  :name "session"
                   :item-entries [:put]
                   :collection-entries [:get :post]}]
    :authentication {:second {:key :basic

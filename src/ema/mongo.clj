@@ -112,8 +112,11 @@
   (let [definition-maps (generate-resource-definition m)]
     (flatten (map definition-map-2-ast definition-maps))))
 
-(defmethod custom-resource-definition :mongo [coll _]
-  (assoc coll :uri (str (:uri coll) "/" (:name coll))))
+(defmethod custom-resource-definition :mongo [coll entry-map]
+  (let [with-database (merge
+                       (select-keys entry-map [:database])
+                       coll)]
+    (assoc coll :uri (str (:uri coll) "/" (:database with-database)))))
 
 (defmethod generate-asts :mongo [m]
   {:handler :bidi
