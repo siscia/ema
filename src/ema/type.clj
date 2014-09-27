@@ -22,4 +22,6 @@
                       :handler t/Keyword}
           :optional {:item-entries (t/Seq t/Keyword)
                      :collection-entries (t/Seq t/Keyword)
-                     :authentication t/Keyword}))
+                     :authentication t/Keyword}
+          :absent-keys #{:collections}))
+

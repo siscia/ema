@@ -22,4 +22,10 @@
                              :uri "https://www.auth.com/nvfir"
                              :collection "user"
                              :username "username"
-                             :password "password"}}})
+                             :password "password"}
+                    :first {:key :mongo-dynamics
+                            :database "ema"
+                            :collection "user"
+                            :username :username
+                            :password :password
+                            :security :dynamic}}})

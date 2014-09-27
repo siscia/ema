@@ -30,6 +30,7 @@
         coll (:name m)]
     {:allowed-methods (:collection-entries m)
      :available-media-types ["text/plain" "application/json"]
+     :authorized? true
      :malformed? #(parse-json-malformed % ::data)
      :post! (fn [ctx] {::new (mc/insert-and-return db coll (::data ctx))})
      :post-redirect? false
@@ -49,6 +50,7 @@
                       (if-not (first id-check)
                         (parse-json-malformed ctx ::data)
                         id-check)))
+      :authorized? true
       :handle-malformed #(generate-string (::malformed-message %))
       :exists? (fn [ctx]
                  (let [resource (mc/find-map-by-id db coll (ObjectId. id))]

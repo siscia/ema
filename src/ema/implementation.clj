@@ -8,11 +8,13 @@
 ;; (t/ann generate-asts [t/Any -> t/Any])
 (defmulti generate-asts :key)
 
-;; (t/ann specific-resource-definition [ResourceDefinition EntryMap -> ResourceDefinition])
+;; (t/ann custom-resource-definition [ResourceDefinition EntryMap -> ResourceDefinition])
 (defmulti custom-resource-definition (fn [pre-res entry-map]
                                          (:key pre-res)))
 (defmethod custom-resource-definition :default [coll entry-map]
   coll)
+
+(defmulti authenticantion :authentication)
 
 ;; (t/ann authentication-resource-definition
 ;;        (t/All [x y] [(t/Map x y) (t/Map x y) -> (t/Map x y)]))
@@ -21,10 +23,9 @@
     :authentication
     (get auth-map (:authentication coll))))
 
-;; (t/ann inject-basic-key
-;;        (t/All [x y] [(t/Map x y) (t/Map x y) -> (t/Map x y)]))
+(t/ann inject-basic-key [PreResourceDefinition EntryMap -> ResourceDefinition])
 (defn inject-basic-key [coll entry-map]
-  (merge (select-keys entry-map [:key :handler :uri :database]) coll))
+  (merge (select-keys entry-map [:key :handler :uri]) coll))
 
 ;;(t/ann define-resource [EntryMap -> (t/Fn [PreResourceDefinition -> ResourceDefinition])])
 (defn define-resource [entry-map]
