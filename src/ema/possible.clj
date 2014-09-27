@@ -10,7 +10,7 @@
    :database "ema"
    :collections [{:key :mongo
                   :name "user"
-                  :authentication :second
+                  :authentication :first
                   :item-entries [:get :patch :delete]
                   :collection-entries [:post :get]}
                  {:key :mongo

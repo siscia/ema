@@ -14,7 +14,11 @@
 (defmethod custom-resource-definition :default [coll entry-map]
   coll)
 
-(defmulti authenticantion :authentication)
+(defmulti  authentication :key)
+
+(defmethod authentication :default [m]
+  (println m (:key m) "wroooooong")
+  false)
 
 ;; (t/ann authentication-resource-definition
 ;;        (t/All [x y] [(t/Map x y) (t/Map x y) -> (t/Map x y)]))
@@ -23,7 +27,7 @@
     :authentication
     (get auth-map (:authentication coll))))
 
-(t/ann inject-basic-key [PreResourceDefinition EntryMap -> ResourceDefinition])
+;;(t/ann inject-basic-key [PreResourceDefinition EntryMap -> ResourceDefinition])
 (defn inject-basic-key [coll entry-map]
   (merge (select-keys entry-map [:key :handler :uri]) coll))
 
@@ -36,5 +40,7 @@
         (custom-resource-definition entry-map))))
 
 ;;(t/ann generate-resource-definition [EntryMap -> (t/Seq ResourceDefinition)])
-(defn generate-resource-definition [{:keys [collections authentication] :as entry-map}]
-  (map (define-resource entry-map) collections))
+(defn generate-resource-definition [{:keys [collections] :as entry-map}]
+  (let [a (map (define-resource entry-map) collections)]
+    (println a)
+    a))
