@@ -1,6 +1,7 @@
+
 # ema
 
-`Ema` provide a simple and easy abstraction to build REST service.
+`Ema` provides a simple and easy abstraction to build REST service.
 
 `Ema` is a very little library built on top of [Liberator](http://clojure-liberator.github.io/liberator/).
 
@@ -12,7 +13,7 @@ The main idea is too provide a simple and yet powerful abstraction over Liberato
 
 ## Maturity
 
-The project is just started, it is not mature enough for any use.
+The project has just started thus it is not mature enough for any use.
 
 ### Implemented
 
@@ -27,7 +28,7 @@ The project is just started, it is not mature enough for any use.
 
 ## Usage
 
-The project is still unsable for any non-trivial project.
+The project is still unusable for any non-trivial project.
 
 However you can already have an idea of the way to use `Ema`
 
@@ -37,7 +38,7 @@ Create a new clojure project
 lein new awesome-name
 ```
 
-Make the project.clj looks like this.
+Make the project.clj look like this.
 
 ```clojure
 (defproject awesome-name "0.1.0-SNAPSHOT"
@@ -50,7 +51,7 @@ Make the project.clj looks like this.
   :ring {:handler awesome-name.core/app}) ;;added
 ```
   
-Note that I have add the dependecies and a ring handler.
+Note that I have added the dependecies and a ring handler.
 
 At this point we need to generate our handler.
 
@@ -85,9 +86,9 @@ At this point we need to generate our handler.
 
 Now you need to run an instance of MongoDB in your machine, or just change the `uri` key in something more appropriate, like the url of a cloud instance of MongoDB.
 
-Now, if everything went smootly you will be serving two REST resource, `user` and `session`.
+Now, if everything went smootly you are serving two REST resource, `user` and `session`.
 
-Please note the configuration, you won't be able to put on `user` nor you will be able to `get`, `patch` and `delete` a single `session`.
+Please note the configuration: you won't be able to `put` on `user` nor you will be able to `get`, `patch` and `delete` a single `session`.
 
 Of course you can change that.
 
@@ -95,7 +96,7 @@ Also, `user` and `session` are not in the same database (in the mongodb meaning)
 
 `user` is in the "ema" database while `session` is in the "session" database.
 
-If you add another collections, let say `author` and `book`.
+If you add other collections, let say `author` and `book`
 
 ```clojure
 {
@@ -129,3 +130,7 @@ As always contributing is very much welcome. Just send a Pull Request or Open an
 Copyright © 2014 Simone Mosciatti
 
 Distributed under the Eclipse Public License either version 1.0
+
+## Thanks
+
+Thanks to Emanuela Furfaro for being my muse.
