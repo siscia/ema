@@ -22,6 +22,7 @@ The project is just started, it is not mature enough for any use.
 ### To Be Implemented
 
 * Authentication
+* Manage Middleware
 * GET search
 * SQL layer
 
