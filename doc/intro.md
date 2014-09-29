@@ -16,3 +16,8 @@ From this point all the work is left to the custom layer.
 
 The list of resource-definition is passed trought generate-asts whose result is passed trought generate-handler.
 
+## Types
+
+No yet implemented because I am not able to, however there are some types definition that can help undrstand the overall structure.
+
+The types definition can be found in the `ema.types` namespace.
