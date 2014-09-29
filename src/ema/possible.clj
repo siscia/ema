@@ -8,16 +8,16 @@
    :handler :bidi
    :uri "mongodb://localhost:27017"
    :database "ema"
-   :collections [{:key :mongo
-                  :name "user"
-                  :authentication :first
-                  :item-entries [:get :patch :delete]
-                  :collection-entries [:post :get]}
-                 {:key :mongo
-                  :database "test"
-                  :name "session"
-                  :item-entries [:put]
-                  :collection-entries [:get :post]}]
+   :resources [{:key :mongo
+                :name "user"
+                :authentication :first
+                :item-entries [:get :patch :delete]
+                :collection-entries [:post :get]}
+               {:key :mongo
+                :database "test"
+                :name "session"
+                :item-entries [:put]
+                :collection-entries [:get :post]}]
    :authentication {:second {:key :basic
                              :uri "https://www.auth.com/nvfir"
                              :collection "user"
@@ -25,7 +25,7 @@
                              :password "password"}
                     :first {:key :mongo-dynamics
                             :database "ema"
-                            :collection "user"
+                            :name "user"
                             :username :username
                             :password :password
                             :security :dynamic}}})

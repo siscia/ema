@@ -5,13 +5,17 @@
             [ring.middleware.basic-authentication :refer [wrap-basic-authentication]])
   (:import org.mindrot.jbcrypt.BCrypt))
 
-(defn wrapper-mongo [req]
-  (wrap-basic-authentication
-   req identity (fn [u p] {:username u
-                           :password p})))
+(defn wrapper-mongo []
+  (fn [req]
+    (wrap-basic-authentication
+     req
+     (fn [u p] {:username u
+                :password p}))))
 
 (defn check-password [plain hash]
-  (BCrypt/checkpw plain hash))
+  (try (BCrypt/checkpw plain hash)
+       (catch Exception e
+         false)))
 
 (defn hash-password
   ([password salt]
@@ -20,17 +24,15 @@
      (BCrypt/hashpw password (BCrypt/gensalt))))
 
 (defmethod authentication :mongo-dynamics [m]
-  (println "YEEEEEEEEEEEEEAAH")
   (let [{:keys [conn db]} (mg/connect-via-uri (:uri m))
         coll (:name m)]
     (if (and (-> m :security :dynamic)
              (not (mc/find db coll))) ;; empty db
       true
       (fn [ctx]
-        (let [{:keys [user password]} (:basic-authentication ctx)
+        (let [{:keys [username password]} (-> ctx :request :basic-authentication)
               user (mc/find-one-as-map
-                    db coll {((:username m) ctx) user})
-              _ (println "ok")]
-          (if (check-password ((:password m) ctx) ((:password m) user))
+                    db coll {(:username m) username})]
+          (if (check-password password ((:password m) username))
             [true user]
             false))))))

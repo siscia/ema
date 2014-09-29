@@ -7,25 +7,29 @@
             [ema.possible :refer [possible]]
             [ring.middleware.multipart-params :refer [wrap-multipart-params]]
             [ring.middleware.basic-authentication :refer [wrap-basic-authentication]]
-
             [ema.mongo]
             [ema.authentication]
             [ema.routes-gen]))
 
-(def example
-  (generate-handler
-   (generate-asts possible)))
+;; (def example
+;;   (generate-handler
+;;    (generate-asts possible)))
 
 (def app
-  (-> example
+  (-> possible
+      generate-asts
+      generate-handler
       (wrap-trace :header :ui)
-      wrap-multipart-params
-      ))
+      wrap-multipart-params))
 
 (defn ema [m]
   (-> m
       generate-asts
       generate-handler
       wrap-multipart-params
-      (wrap-basic-authentication identity (fn [u p] {:username u
-                                                     :password p}))))
+      (wrap-basic-authentication (fn [u p]
+                                   {:username u
+                                    :password p}))
+      ))
+
+(def app (ema possible))
