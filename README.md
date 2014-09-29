@@ -64,16 +64,16 @@ At this point we need to generate our handler.
   {:handler :bidi
    :uri "mongodb://localhost:27017"
    :database "ema"
-   :collections [{:key :mongo
-                  :name "user"
-                  :authentication :second
-                  :item-entries [:get :patch :delete] ;; miss put
-                  :collection-entries [:post :get]}
-                 {:key :mongo
-				  :database "session" ;; attention here
-                  :name "session"
-                  :item-entries [:put] ;; miss get patch delete
-                  :collection-entries [:get :post]}]
+   :resources [{:key :mongo
+	            :name "user"
+				:authentication :second
+				:item-entries [:get :patch :delete] ;; miss put
+                :collection-entries [:post :get]}
+               {:key :mongo
+			    :database "session" ;; attention here
+				:name "session"
+                :item-entries [:put] ;; miss get patch delete
+                :collection-entries [:get :post]}]
    :authentication {:second {:key :basic
                              :uri "https://www.auth.com/awesome-app"
                              :collection "user"

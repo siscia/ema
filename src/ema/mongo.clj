@@ -28,9 +28,13 @@
 (defn collection-entries [m]
   (let [{:keys [conn db]} (mg/connect-via-uri (:uri m))
         coll (:name m)]
-    {:allowed-methods (:collection-entries m)
+    {:allowed-methods (concat (:collection-mth m) (:public-collection-mth m))
      :available-media-types ["text/plain" "application/json"]
-     :authorized? (authentication (:authentication m))
+     :allowed? (fn [ctx]
+                 (if (some #{(-> ctx :request :request-method)}
+                           (:public-collection-mth m))
+                   true
+                   (authentication (:authentication m) ctx)))
      :malformed? #(parse-json-malformed % ::data)
      :post! (fn [ctx] {::new (mc/insert-and-return db coll (::data ctx))})
      :post-redirect? false
@@ -42,47 +46,48 @@
 
 (defn item-entries [m id]
   (let [{:keys [conn db]} (mg/connect-via-uri (:uri m))
-        coll (:name m)
-        _ (println (str "\n--------\n"
-                        (:authentication m)
-                        "\n--------\n"))]
-     {:allowed-methods (:item-entries m)
-      :available-media-types ["text/plain" "application/json"]
-      :malformed? (fn [ctx]
-                    (let [id-check (not-valid-id? id)]
-                      (if-not (first id-check)
-                        (parse-json-malformed ctx ::data)
-                        id-check)))
-      :authorized? (authentication (:authentication m))
-      :handle-malformed #(generate-string (::malformed-message %))
-      :exists? (fn [ctx]
-                 (let [resource (mc/find-map-by-id db coll (ObjectId. id))]
-                   (if-not (empty? resource)
-                     [true {::resource resource}]
-                     [false {::not-found-message (str "The resource with id \"" id "\" doesn't exist.")}])))
-      :handle-not-found #(generate-string (::not-found-message %))
-      :multiple-reppresentation? false
-      :delete! #(mc/remove-by-id db coll (ObjectId. id))
-      :delete-enacted? true
-      :patch! (fn [ctx]
-                {::patched (mc/save-and-return db coll (merge-with merge (::resource ctx) (::data ctx)))})
-      :handle-exception (fn [ctx]
-                          (println (:exception ctx))
-                          (throw (:exception ctx)))
-      :respond-with-entity? true
-      :can-put-to-missing? true
+        coll (:name m)]
+    {:allowed-methods (concat (:item-mth m) (:public-item-mth m))
+     :available-media-types ["text/plain" "application/json"]
+     :malformed? (fn [ctx]
+                   (let [id-check (not-valid-id? id)]
+                     (if-not (first id-check)
+                       (parse-json-malformed ctx ::data)
+                       id-check)))
+     :allowed? (fn [ctx]
+                    (if (some #{(-> ctx :request :request-method)}
+                              (:public-item-mth m))
+                      true
+                      (authentication (:authentication m) ctx)))
+     :handle-malformed #(generate-string (::malformed-message %))
+     :exists? (fn [ctx]
+                (let [resource (mc/find-map-by-id db coll (ObjectId. id))]
+                  (if-not (empty? resource)
+                    [true {::resource resource}]
+                    [false {::not-found-message (str "The resource with id \"" id "\" doesn't exist.")}])))
+     :handle-not-found #(generate-string (::not-found-message %))
+     :multiple-reppresentation? false
+     :delete! #(mc/remove-by-id db coll (ObjectId. id))
+     :delete-enacted? true
+     :patch! (fn [ctx]
+               {::patched (mc/save-and-return db coll (merge-with merge (::resource ctx) (::data ctx)))})
+     :handle-exception (fn [ctx]
+                         (println (:exception ctx))
+                         (throw (:exception ctx)))
+     :respond-with-entity? true
+     :can-put-to-missing? true
       :conflict? false
-      :put! (fn [ctx]
-              {::putted (mc/save-and-return db coll (merge-with merge (::resource ctx)
-                                                                (assoc (::data ctx) :_id (ObjectId. id))))})
-      :new? #(boolean (::resource %))
-      :handle-ok (fn [ctx]
-                   (case (get-in ctx [:request :request-method])
-                     :get (generate-string (::resource ctx))
-                     :put (generate-string (::putted ctx))
-                     :patch (generate-string (::patched ctx))
-                     :delete {:message "Eliminated resource"
-                              :resource (generate-string (::resource ctx))}))}))
+     :put! (fn [ctx]
+             {::putted (mc/save-and-return db coll (merge-with merge (::resource ctx)
+                                                               (assoc (::data ctx) :_id (ObjectId. id))))})
+     :new? #(boolean (::resource %))
+     :handle-ok (fn [ctx]
+                  (case (get-in ctx [:request :request-method])
+                    :get (generate-string (::resource ctx))
+                    :put (generate-string (::putted ctx))
+                    :patch (generate-string (::patched ctx))
+                    :delete {:message "Eliminated resource"
+                             :resource (generate-string (::resource ctx))}))}))
 
 (defn item-entries-value
   [definition-map]
@@ -90,7 +95,6 @@
    :route (:name definition-map)
    :params :id
    :resource (fn [{:keys [route-params] :as req}]
-               (println req)
                ((resource (item-entries definition-map (:id route-params)))
                 req))})
 
@@ -108,9 +112,9 @@
 
 (defn definition-map-2-ast [definition-map]
   (reduce (reducing-f definition-map)
-          [] [{:predicate (fn [dm] (contains? dm :item-entries))
+          [] [{:predicate (fn [dm] (contains? dm :item-mth))
                :value item-entries-value}
-              {:predicate (fn [dm] (contains? dm :collection-entries))
+              {:predicate (fn [dm] (contains? dm :collection-mth))
                :value collection-entries-value}]))
 
 (defn generate-mongo-asts [m]

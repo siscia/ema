@@ -15,12 +15,12 @@
 ;;   (generate-handler
 ;;    (generate-asts possible)))
 
-(def app
-  (-> possible
-      generate-asts
-      generate-handler
-      (wrap-trace :header :ui)
-      wrap-multipart-params))
+;; (def app
+;;   (-> possible
+;;       generate-asts
+;;       generate-handler
+;;       (wrap-trace :header :ui)
+;;       wrap-multipart-params))
 
 (defn ema [m]
   (-> m
@@ -30,6 +30,7 @@
       (wrap-basic-authentication (fn [u p]
                                    {:username u
                                     :password p}))
+      (wrap-trace :header :ui)
       ))
 
 (def app (ema possible))

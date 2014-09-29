@@ -11,34 +11,42 @@
 
 
 ;; (t/ann generate-handler [t/Any -> t/Any]) 
-(defmulti
+(defmulti generate-handler
   "Custom implementation layer are suppose to provide an implementation."
-  generate-handler :handler)
+  :handler)
 
 ;; (t/ann generate-asts [t/Any -> t/Any])
-(defmulti
+(defmulti generate-asts
   "Custom implementation layer are suppose to provide an implementation."
-  generate-asts :key)
+  :key)
 
 ;; (t/ann custom-resource-definition [ResourceDefinition EntryMap -> ResourceDefinition])
-(defmulti
+(defmulti custom-resource-definition
   "This function is suppose to be used as entry point by the custom layers. A custom layer can redefine this function as its own will adding and modify whatever key it need."
-  custom-resource-definition (fn [pre-res entry-map]
-                                         (:key pre-res)))
-(defmethod custom-resource-definition :default [coll entry-map]
-  coll)
+  (fn [pre-res entry-map]
+    (:key pre-res)))
 
-(defmulti
+(defmethod custom-resource-definition :default [res-def entry-map]
+  res-def)
+
+(defmulti authentication
   "This function is called whenever is necessary to determinate if a request is authorized or not.
 Custom authentication layer are suppose to provide an implementation."
-  authentication :key)
+  (fn
+    ([m] (:key m))
+    ([m _ctx_] (:key m))
+    ([m _ctx_ _k_] (:key m))))
 
-(defmethod authentication :default [m]
-  false)
+(defmethod authentication :default
+  ([m]
+     (partial authentication m))
+  ([m _ctx_]
+     false)
+  ([m _ctx_ _k_]
+     false))
 
-(defmulti
-  "The function will smartly add the authentication definition to a resource."
-  authentication-resource-definition
+(defmulti authentication-resource-definition
+  "The function will smartly add the authentication definition to a resource." 
   (fn [coll auth]
     (-> auth
         first
@@ -57,15 +65,15 @@ Custom authentication layer are suppose to provide an implementation."
     final))
 
 ;;(t/ann inject-basic-key [PreResourceDefinition EntryMap -> ResourceDefinition])
-(defn
+(defn inject-basic-key
   "Inject in the pre-res map the foundamental keys, from the entry-map, that are not already present."
-  inject-basic-key [coll entry-map]
+  [coll entry-map]
   (merge (select-keys entry-map [:key :handler :uri]) coll))
 
 ;;(t/ann define-resource [EntryMap -> (t/Fn [PreResourceDefinition -> ResourceDefinition])])
-(defn
+(defn define-resource
   "The function is responsible for transform a single pre-res in a resource definition."
-  define-resource [entry-map]
+  [entry-map]
   (fn [res-pre]
     (-> res-pre
         (inject-basic-key entry-map)
@@ -73,8 +81,8 @@ Custom authentication layer are suppose to provide an implementation."
         (custom-resource-definition entry-map))))
 
 ;;(t/ann generate-resource-definition [EntryMap -> (t/Seq ResourceDefinition)])
-(defn
+(defn generate-resource-definition
   "Given an entry-map the function will return a sequence of resource-definition."
-  generate-resource-definition [{:keys [resources] :as entry-map}]
+  [{:keys [resources] :as entry-map}]
   (let [resources-def (map (define-resource entry-map) resources)]
     resources-def))

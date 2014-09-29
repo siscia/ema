@@ -23,16 +23,20 @@
   ([password]
      (BCrypt/hashpw password (BCrypt/gensalt))))
 
-(defmethod authentication :mongo-dynamics [m]
-  (let [{:keys [conn db]} (mg/connect-via-uri (:uri m))
-        coll (:name m)]
-    (if (and (-> m :security :dynamic)
-             (not (mc/find db coll))) ;; empty db
-      true
-      (fn [ctx]
-        (let [{:keys [username password]} (-> ctx :request :basic-authentication)
-              user (mc/find-one-as-map
-                    db coll {(:username m) username})]
-          (if (check-password password ((:password m) username))
-            [true user]
-            false))))))
+(defmethod authentication :mongo-dynamics
+  ([m]
+     (partial authentication m))
+  ([m ctx]
+     (authentication m ctx :user))
+  ([m ctx k]
+     (let [{:keys [conn db]} (mg/connect-via-uri (:uri m))
+           coll (:name m)]
+       (if (and (-> m :security :dynamic)
+                (not (mc/find db coll))) ;; empty db
+         true
+         (let [{:keys [username password]} (-> ctx :request :basic-authentication)
+               user (mc/find-one-as-map
+                     db coll {(:username m) username})]
+           (if (check-password password ((:password m) username))
+             [true {k user}]
+             false))))))

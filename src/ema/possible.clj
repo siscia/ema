@@ -11,19 +11,18 @@
    :resources [{:key :mongo
                 :name "user"
                 :authentication :first
-                :item-entries [:get :patch :delete]
-                :collection-entries [:post :get]}
+                :item-mth [:put :patch :delete :post]
+                :collection-mth [:post]
+                :public-item-mth [:get]
+                :public-collection-mth [:get]}
                {:key :mongo
+                :authentication :first
                 :database "test"
                 :name "session"
-                :item-entries [:put]
-                :collection-entries [:get :post]}]
-   :authentication {:second {:key :basic
-                             :uri "https://www.auth.com/nvfir"
-                             :collection "user"
-                             :username "username"
-                             :password "password"}
-                    :first {:key :mongo-dynamics
+                :item-mth [:put]
+                :collection-mth [:post]
+                :public-collection-mth [:get]}]
+   :authentication {:first {:key :mongo-dynamics
                             :database "ema"
                             :name "user"
                             :username :username
