@@ -1,6 +1,7 @@
 (ns ema.implementation
   (:require [clojure.core.typed :as t]
-            [ema.type :refer [EntryMap ResourceDefinition PreResourceDefinition]]))
+            ;;[ema.type :refer [EntryMap ResourceDefinition PreResourceDefinition]]
+            ))
 
 ;; Dictionary:
 ;; + entry-map, the map that the user provides. An example is ema.possible/possible
@@ -21,12 +22,19 @@
   :key)
 
 ;; (t/ann custom-resource-definition [ResourceDefinition EntryMap -> ResourceDefinition])
-(defmulti custom-resource-definition
+(defmulti custom-inject
   "This function is suppose to be used as entry point by the custom layers. A custom layer can redefine this function as its own will adding and modify whatever key it need."
   (fn [pre-res entry-map]
     (:key pre-res)))
 
-(defmethod custom-resource-definition :default [res-def entry-map]
+(defmethod custom-inject :default [res-def entry-map]
+  res-def)
+
+(defmulti custom-auth-inject
+  "Custom auth implementation layers are suppose to provide an implemetation. "
+  :key)
+
+(defmethod custom-auth-inject :default [res-def auth-map]
   res-def)
 
 (defmulti authentication
@@ -45,30 +53,40 @@ Custom authentication layer are suppose to provide an implementation."
   ([m _ctx_ _k_]
      false))
 
-(defmulti authentication-resource-definition
+(defmulti auth-inject
   "The function will smartly add the authentication definition to a resource." 
-  (fn [coll auth]
-    (-> auth
-        first
-        second
-        class)))
+  (fn [coll entry-map]
+    (let [auth-map (:auth entry-map)]
+      (loop [level 0
+             m auth-map]
+        (if (map? m)
+          (recur (inc level) (second (first m)))
+          level)))))
 
-(defmethod authentication-resource-definition clojure.lang.IPersistentMap
-  [coll auth-map]
-  (let [sp-auth-map (get auth-map (:authentication coll))
-        sp-auth-map (merge (select-keys coll [:uri :database])
-                           sp-auth-map)
-        sp-auth-map (assoc sp-auth-map
-                      :uri (str (:uri sp-auth-map) "/" (:name sp-auth-map)))
-        final (assoc coll :authentication
+(defmethod auth-inject 2
+  [res-pre entry-map]
+  (let [auth-map (:auth entry-map)
+        sp-auth-map (get auth-map (:auth res-pre))
+        final (assoc res-pre :auth
                      sp-auth-map)]
     final))
 
+(defmethod auth-inject 1
+  [res-pre entry-map]
+  (if (:auth res-pre)
+    (assoc res-pre :auth
+           (:auth entry-map))
+    res-pre))
+
+(defmethod auth-inject 0
+  [res-pre entry-map]
+  (assoc res-pre :auth (:auth entry-map)))
+
 ;;(t/ann inject-basic-key [PreResourceDefinition EntryMap -> ResourceDefinition])
-(defn inject-basic-key
+(defn inject-basic-keys
   "Inject in the pre-res map the foundamental keys, from the entry-map, that are not already present."
-  [coll entry-map]
-  (merge (select-keys entry-map [:key :handler :uri]) coll))
+  [res-pre entry-map]
+  (merge (select-keys entry-map [:key :handler :uri]) res-pre))
 
 ;;(t/ann define-resource [EntryMap -> (t/Fn [PreResourceDefinition -> ResourceDefinition])])
 (defn define-resource
@@ -76,9 +94,10 @@ Custom authentication layer are suppose to provide an implementation."
   [entry-map]
   (fn [res-pre]
     (-> res-pre
-        (inject-basic-key entry-map)
-        (authentication-resource-definition (:authentication entry-map))
-        (custom-resource-definition entry-map))))
+        (inject-basic-keys entry-map)
+        (auth-inject entry-map)
+        (custom-inject entry-map)
+        (custom-auth-inject entry-map))))
 
 ;;(t/ann generate-resource-definition [EntryMap -> (t/Seq ResourceDefinition)])
 (defn generate-resource-definition

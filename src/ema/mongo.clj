@@ -5,7 +5,7 @@
             [cheshire.generate :refer [add-encoder encode-str]]
             [clojure.stacktrace :refer [e]]
             [liberator.core :refer [resource]]
-            [ema.implementation :refer [generate-asts generate-resource-definition custom-resource-definition authentication]])
+            [ema.implementation :refer [generate-asts generate-resource-definition custom-inject authentication]])
   (:import org.bson.types.ObjectId))
 
 (add-encoder org.bson.types.ObjectId encode-str)
@@ -34,7 +34,7 @@
                  (if (some #{(-> ctx :request :request-method)}
                            (:public-collection-mth m))
                    true
-                   (authentication (:authentication m) ctx)))
+                   (authentication (:auth m) ctx)))
      :malformed? #(parse-json-malformed % ::data)
      :post! (fn [ctx] {::new (mc/insert-and-return db coll (::data ctx))})
      :post-redirect? false
@@ -58,7 +58,7 @@
                     (if (some #{(-> ctx :request :request-method)}
                               (:public-item-mth m))
                       true
-                      (authentication (:authentication m) ctx)))
+                      (authentication (:auth m) ctx)))
      :handle-malformed #(generate-string (::malformed-message %))
      :exists? (fn [ctx]
                 (let [resource (mc/find-map-by-id db coll (ObjectId. id))]
@@ -121,7 +121,7 @@
   (let [definition-maps (generate-resource-definition m)]
     (flatten (map definition-map-2-ast definition-maps))))
 
-(defmethod custom-resource-definition :mongo [coll entry-map]
+(defmethod custom-inject :mongo [coll entry-map]
   (let [with-database (merge
                        (select-keys entry-map [:database])
                        coll)]

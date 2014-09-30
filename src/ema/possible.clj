@@ -10,21 +10,21 @@
    :database "ema"
    :resources [{:key :mongo
                 :name "user"
-                :authentication :first
+                :auth :first
                 :item-mth [:put :patch :delete :post]
                 :collection-mth [:post]
                 :public-item-mth [:get]
                 :public-collection-mth [:get]}
                {:key :mongo
-                :authentication :first
+                :auth :first
                 :database "test"
                 :name "session"
                 :item-mth [:put]
                 :collection-mth [:post]
                 :public-collection-mth [:get]}]
-   :authentication {:first {:key :mongo-dynamics
-                            :database "ema"
-                            :name "user"
-                            :username :username
-                            :password :password
-                            :security :dynamic}}})
+   :auth {:first {:key :mongo-dynamics
+                  :database "ema"
+                  :name "user"
+                  :username :username
+                  :password :password
+                  :security :dynamic}}})

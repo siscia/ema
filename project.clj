@@ -16,5 +16,6 @@
                  [bidi "1.10.5"]
                  [ring-basic-authentication "1.0.5"]
                  [org.mindrot/jbcrypt "0.3m"]]
+  :profiles {:dev {:dependencies [[midje "1.6.3"]]}}
   :main ema.core
   :ring {:handler ema.core/app})

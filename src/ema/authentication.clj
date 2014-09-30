@@ -1,5 +1,5 @@
 (ns ema.authentication
-  (:require [ema.implementation :refer [authentication]]
+  (:require [ema.implementation :refer [authentication custom-auth-inject]]
             [monger.collection :as mc]
             [monger.core :as mg]
             [ring.middleware.basic-authentication :refer [wrap-basic-authentication]])
@@ -22,6 +22,15 @@
      (BCrypt/hashpw password (BCrypt/gensalt salt)))
   ([password]
      (BCrypt/hashpw password (BCrypt/gensalt))))
+
+(defmethod custom-auth-inject :mongo-dynamics
+  [res-pre entry-map]
+  (let [auth-map (:auth res-pre)
+        auth-map (merge (select-keys entry-map [:database :uri])
+                        auth-map)
+        auth-map (assoc auth-map :uri
+                        (str (:uri auth-map) "/" (:name auth-map)))]
+    (assoc res-pre :auth auth-map)))
 
 (defmethod authentication :mongo-dynamics
   ([m]
