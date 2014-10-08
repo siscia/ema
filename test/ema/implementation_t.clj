@@ -1,6 +1,6 @@
 (ns ema.implementation-t
   (:use midje.sweet)
-  (:require [ema.implementation :refer [inject-basic-keys auth-inject custom-inject custom-auth-inject authentication]]))
+  (:require [ema.implementation :refer [inject-basic-keys auth-inject custom-inject custom-auth-inject authentication generate-resource-definition]]))
 
 (facts
  "checking inject-basic-key"
@@ -75,3 +75,28 @@
   ( (authentication {}) {}) => false
   (authentication {} {}) => false
   (authentication {} {} :foo) => false))
+
+(facts
+ "checking generate-resource-definition"
+ (let [entry-map {:key :a
+                  :handler :b
+                  :uri :c
+                  :resources [{:key :key-a
+                               :auth :first}
+                              {:uri :uri-b
+                               :auth :second
+                               :handler :handler-b}]
+                  :auth {:first {:key :auth-1
+                                 :foo :bar}
+                         :second {:key :auth-2
+                                  :bar :foo}}}]
+   (generate-resource-definition entry-map) => [{:key :key-a
+                                                 :auth {:key :auth-1
+                                                        :foo :bar}
+                                                 :uri :c
+                                                 :handler :b}
+                                                {:key :a
+                                                 :auth {:key :auth-2
+                                                        :bar :foo}
+                                                 :uri :uri-b
+                                                 :handler :handler-b}]))

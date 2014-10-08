@@ -24,15 +24,21 @@
 ;; (t/ann custom-resource-definition [ResourceDefinition EntryMap -> ResourceDefinition])
 (defmulti custom-inject
   "This function is suppose to be used as entry point by the custom layers. A custom layer can redefine this function as its own will adding and modify whatever key it need."
-  (fn [pre-res entry-map]
-    (:key pre-res)))
+  (fn [res-def entry-map]
+    (:key res-def)))
 
 (defmethod custom-inject :default [res-def entry-map]
   res-def)
 
 (defmulti custom-auth-inject
-  "Custom auth implementation layers are suppose to provide an implemetation. "
-  :key)
+  "
+  Custom auth implementation layers are suppose to provide an implemetation.
+  Note that the auth map is manipulate after that is been inject in the res-definition
+  "
+  (fn [res-def entry-map]
+    (if-let [auth-map (:auth res-def)]
+      (:key auth-map)
+      :no-auth)))
 
 (defmethod custom-auth-inject :default [res-def auth-map]
   res-def)
@@ -90,7 +96,10 @@ Custom authentication layer are suppose to provide an implementation."
 
 ;;(t/ann define-resource [EntryMap -> (t/Fn [PreResourceDefinition -> ResourceDefinition])])
 (defn define-resource
-  "The function is responsible for transform a single pre-res in a resource definition."
+  "
+  The function is responsible for transform a single pre-res in a resource definition.
+  The auth map is modified when is already inject in the res-definition.
+  "
   [entry-map]
   (fn [res-pre]
     (-> res-pre

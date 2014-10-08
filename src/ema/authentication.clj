@@ -38,6 +38,7 @@
   ([m ctx]
      (authentication m ctx :user))
   ([m ctx k]
+     (println m)
      (let [{:keys [conn db]} (mg/connect-via-uri (:uri m))
            coll (:name m)]
        (if (and (-> m :security :dynamic)

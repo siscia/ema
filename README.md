@@ -19,10 +19,10 @@ The project has just started thus it is not mature enough for any use.
 
 * MongoDB layer
 * bidi (routing) layer
+* Authentication
 
 ### To Be Implemented
 
-* Authentication
 * Manage Middleware
 * GET search
 * SQL layer
@@ -87,7 +87,7 @@ At this point we need to generate our handler.
 
 Now you need to run an instance of MongoDB in your machine, or just change the `uri` key in something more appropriate, like the url of a cloud instance of MongoDB.
 
-Now, if everything went smootly you are serving two REST resource, `user` and `session`.
+	Now, if everything went smootly you are serving two REST resource, `user` and `session`.
 
 Please note the configuration: you won't be able to `put` on `user` nor you will be able to `get`, `patch` and `delete` a single `session`.
 

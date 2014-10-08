@@ -1,4 +1,4 @@
-(defproject ema "0.0.4"
+(defproject ema "0.0.5"
   :description "A simple interface to write REST"
   :url "https://github.com/siscia/ema"
   :license {:name "Eclipse Public License"

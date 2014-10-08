@@ -12,12 +12,11 @@
 
 (defn parse-json-malformed [ctx k]
   (when (#{:put :post :patch} (get-in ctx [:request :request-method]))
-    (if-let [body (slurp (get-in ctx [:request :body]))]
-      (do
-        (try
-          [false {k (parse-string body)}]
-          (catch Exception e
-            [true {::malformed-message "Malformed JSON"}])))
+    (if-let [body (get-in ctx [:request :body])]
+      (try
+        [false {k (parse-string (slurp body))}]
+        (catch Exception e
+          [true {::malformed-message "Malformed JSON"}]))
       [true {::malformed-message "No body"}])))
 
 (defn not-valid-id? [id]
@@ -31,6 +30,8 @@
     {:allowed-methods (concat (:collection-mth m) (:public-collection-mth m))
      :available-media-types ["text/plain" "application/json"]
      :allowed? (fn [ctx]
+                 (println (-> ctx :request :request-method)
+                          (:public-collection-mth m))
                  (if (some #{(-> ctx :request :request-method)}
                            (:public-collection-mth m))
                    true

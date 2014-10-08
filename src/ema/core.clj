@@ -1,7 +1,6 @@
 (ns ema.core
   (:use org.httpkit.server)
-  (:require [compojure.core :refer [defroutes ANY]]
-            [liberator.core :refer [resource]]
+  (:require [clojure.edn :as edn]
             [liberator.dev :refer [wrap-trace]]
             [ema.implementation :refer [generate-handler generate-asts]]
             [ema.possible :refer [possible]]
@@ -9,18 +8,9 @@
             [ring.middleware.basic-authentication :refer [wrap-basic-authentication]]
             [ema.mongo]
             [ema.authentication]
-            [ema.routes-gen]))
+            [ema.routes-gen])
 
-;; (def example
-;;   (generate-handler
-;;    (generate-asts possible)))
-
-;; (def app
-;;   (-> possible
-;;       generate-asts
-;;       generate-handler
-;;       (wrap-trace :header :ui)
-;;       wrap-multipart-params))
+  (:use ring.adapter.jetty))
 
 (defn ema [m]
   (-> m
@@ -30,7 +20,11 @@
       (wrap-basic-authentication (fn [u p]
                                    {:username u
                                     :password p}))
-      (wrap-trace :header :ui)
-      ))
+      (wrap-trace :header :ui)))
 
 (def app (ema possible))
+
+(defn -main [yaml-file]
+  (let [resource-definition (-> yaml-file slurp edn/read-string)
+        app1 (ema resource-definition)]
+    (run-server app1 {:port 8000})))
