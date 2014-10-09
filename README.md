@@ -136,4 +136,4 @@ Distributed under the Eclipse Public License either version 1.0
 
 ## Thanks
 
-Thanks to Emanuela Furfaro for being my muse.
+Thanks to Emanuela Furfaro for being my inspiration.
