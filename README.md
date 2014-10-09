@@ -1,6 +1,8 @@
 
 # ema
 
+![ema](https://raw.githubusercontent.com/siscia/ema/master/resources/logo/ema.jpeg)
+
 `Ema` provides a simple and easy abstraction to build REST service.
 
 `Ema` is a very little library built on top of [Liberator](http://clojure-liberator.github.io/liberator/).
