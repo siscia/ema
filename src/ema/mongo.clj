@@ -24,31 +24,30 @@
       [false {}]
       [true {::malformed-message (str "ID: \"" id "\" not valid. Please check: http://api.mongodb.org/java/2.0/org/bson/types/ObjectId.html")}]))
 
-(defn collection-entries [m]
-  (let [{:keys [conn db]} (mg/connect-via-uri (:uri m))
-        coll (:name m)]
-    {:allowed-methods (concat (:collection-mth m) (:public-collection-mth m))
-     :available-media-types ["text/plain" "application/json"]
-     :allowed? (fn [ctx]
-                 (println (-> ctx :request :request-method)
-                          (:public-collection-mth m))
-                 (if (some #{(-> ctx :request :request-method)}
-                           (:public-collection-mth m))
-                   true
-                   (authentication (:auth m) ctx)))
-     :malformed? #(parse-json-malformed % ::data)
-     :post! (fn [ctx] {::new (mc/insert-and-return db coll (::data ctx))})
-     :post-redirect? false
-     :new? #(boolean (::new %))
-     :handle-created (fn [ctx]
-                       (generate-string (::new ctx)))
-     :handle-ok (fn [ctx]
-                  (generate-string {:data (mc/find-maps db coll)}))}))
+(defn map-collection-entries [m conn db coll]
+  {:allowed-methods (concat (:collection-mth m) (:public-collection-mth m))
+   :available-media-types ["text/plain" "application/json"]
+   :allowed? (fn [ctx]
+               (if (some #{(-> ctx :request :request-method)}
+                         (:public-collection-mth m))
+                 true
+                 (authentication (:auth m) ctx)))
+   :malformed? #(parse-json-malformed % ::data)
+   :post! (fn [ctx] {::new (mc/insert-and-return db coll (::data ctx))})
+   :post-redirect? false
+   :new? #(boolean (::new %))
+   :handle-created (fn [ctx]
+                     (generate-string (::new ctx)))
+   :handle-ok (fn [ctx]
+                (generate-string {:data (mc/find-maps db coll)}))})
 
-(defn item-entries [m id]
-  (let [{:keys [conn db]} (mg/connect-via-uri (:uri m))
-        coll (:name m)]
-    {:allowed-methods (concat (:item-mth m) (:public-item-mth m))
+(defn collection-entries [definition-map]
+  (let [{:keys [conn db]} (mg/connect-via-uri (:uri definition-map))
+        coll (:name definition-map)]
+    (map-collection-entries definition-map conn db coll)))
+
+(defn map-item-entries [m id conn db coll]
+  {:allowed-methods (concat (:item-mth m) (:public-item-mth m))
      :available-media-types ["text/plain" "application/json"]
      :malformed? (fn [ctx]
                    (let [id-check (not-valid-id? id)]
@@ -88,7 +87,12 @@
                     :put (generate-string (::putted ctx))
                     :patch (generate-string (::patched ctx))
                     :delete {:message "Eliminated resource"
-                             :resource (generate-string (::resource ctx))}))}))
+                             :resource (generate-string (::resource ctx))}))})
+
+(defn item-entries [m id]
+  (let [{:keys [conn db]} (mg/connect-via-uri (:uri m))
+        coll (:name m)]
+    (map-item-entries m id conn db coll)))
 
 (defn item-entries-value
   [definition-map]

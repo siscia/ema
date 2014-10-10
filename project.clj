@@ -1,4 +1,4 @@
-(defproject ema "0.0.5"
+(defproject ema "0.0.6"
   :description "A simple interface to write REST"
   :url "https://github.com/siscia/ema"
   :license {:name "Eclipse Public License"
@@ -18,4 +18,5 @@
                  [org.mindrot/jbcrypt "0.3m"]]
   :profiles {:dev {:dependencies [[midje "1.6.3"]]}}
   :main ema.core
-  :ring {:handler ema.core/app})
+  :ring {:handler ema.core/app}
+  :aot [ema.core])

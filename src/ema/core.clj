@@ -9,8 +9,7 @@
             [ema.mongo]
             [ema.authentication]
             [ema.routes-gen])
-
-  (:use ring.adapter.jetty))
+  (:gen-class))
 
 (defn ema [m]
   (-> m
@@ -26,5 +25,5 @@
 
 (defn -main [yaml-file]
   (let [resource-definition (-> yaml-file slurp edn/read-string)
-        app1 (ema resource-definition)]
-    (run-server app1 {:port 8000})))
+        app (ema resource-definition)]
+    (run-server app {:port 8000})))

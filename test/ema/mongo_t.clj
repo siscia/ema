@@ -1,6 +1,7 @@
 (ns ema.mongo-t
   (:use midje.sweet)
-  (:require [ema.mongo :refer [parse-json-malformed not-valid-id? collection-entries]]))
+  (:require [ema.mongo :refer [parse-json-malformed not-valid-id? map-collection-entries]]
+            [ema.implementation :refer [authentication]]))
 
 (facts
  "Checking json malformed."
@@ -25,9 +26,9 @@
   (parse-json-malformed
    {:request
     {:request-method :patch
-     :body ..sluper..}} :key) => [false {:key {"a" "b"}}]
+     :body "nil"}} :key) => [false {:key {"a" "b"}}]
      (provided
-      (slurp ..sluper..) => "{\"a\" : \"b\"}")))
+      (slurp "nil") => "{\"a\" : \"b\"}")))
 
 (facts
  "Checking validit of id"
@@ -39,18 +40,33 @@
   (not-valid-id? "5434f6a7c830d077e497782e") => [false {}]))
 
 (facts
- (let [ce collection-entries]
-   "Testing collection entries, please note that I haven't find a better way to test this."
+ (let [definition-map {:public-collection-mth [:post :patch]
+                       :collection-mth [:get]
+                       :auth ..auth..} 
+       resource-map (map-collection-entries
+                     definition-map
+                     :conn :db :coll)
+       rm resource-map]
    (fact
-    "Check post-redirct? value"
-    (-> {} ce :post-redirect?) => false
-    (provided
-     (monger.core/connect-via-uri nil) => {}))
+    "check allowed-methods"
+    (some #{:put} (:allowed-methods rm)) => falsey
+    (some #{:get} (:allowed-methods rm)) => truthy
+    (some #{:post} (:allowed-methods rm)) => truthy)
    (fact
-    "Check allowed?"
-    (-> {:public-collection-mth [:post]}
-        ce :allowed?
-        {:request {:request-method :post}}) => true
-    (provided
-     (monger.core/connect-via-uri nil) => {}))))
-
+    "Check post-redirect? value"
+    (-> rm :post-redirect?) => false)
+   (fact
+    "Check authentication public"
+    ((:allowed? rm) {:request {:request-method :post}}) => true)
+   (fact
+    "Checking true authentication not public"
+    (let [ctx {:request {:request-method :get}}]
+      ((:allowed? rm) ctx) => true
+      (provided
+       (authentication ..auth.. ctx) => true)))
+   (fact
+    "Checking false authentication not public"
+    (let [ctx {:request {:request-method :put}}]
+      ((:allowed? rm) ctx) => false
+      (provided
+       (authentication ..auth.. ctx) => false)))))

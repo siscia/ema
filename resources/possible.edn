@@ -8,7 +8,7 @@
               :item-mth [:put :patch :delete :post]
               :collection-mth [:post]
               :public-item-mth [:get]
-              :public-collection-mth [:get]}
+              :public-collection-mth [:get :post]}
              {:key :mongo
               :auth :first
               :database "test"
