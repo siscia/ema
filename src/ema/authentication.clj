@@ -23,6 +23,10 @@
   ([password]
      (BCrypt/hashpw password (BCrypt/gensalt))))
 
+(defn empty-collection? [db coll]
+  "Check if a collection in the database is empty."
+  (not (seq (mc/find-maps db coll))))
+
 (defmethod custom-auth-inject :mongo-dynamics
   [res-pre entry-map]
   (let [auth-map (:auth res-pre)
@@ -38,13 +42,13 @@
   ([m ctx]
      (authentication m ctx :user))
   ([m ctx k]
-     (println m)
      (let [{:keys [conn db]} (mg/connect-via-uri (:uri m))
            coll (:name m)]
-       (if (and (-> m :security :dynamic)
-                (not (mc/find db coll))) ;; empty db
+       (if (and (= (:security m) :dynamic)
+                (empty-collection? db coll))
          true
-         (let [{:keys [username password]} (-> ctx :request :basic-authentication)
+         (let [{:keys [username password]}
+               (-> ctx :request :basic-authentication)
                user (mc/find-one-as-map
                      db coll {(:username m) username})]
            (if (check-password password ((:password m) username))
