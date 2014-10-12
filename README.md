@@ -152,10 +152,10 @@ I also have packed ema itself as a Docker.
 
 You still need a configuration file in .edn format (a clojure map).
 
-Suppose you have save the configuration file in `/ema/config.edn` to run the docker you need to run the following.
+Suppose you have save the configuration file in `~/ema/config.edn` to run the docker you need to run the following.
 
 ```bash
-sudo docker run --net="host" -v ~/ema/:/ema siscia/ema:lastest "/ema/config.edn" 
+sudo docker run --net="host" -v ~/ema/:/ema siscia/ema:latest "/ema/config.edn" 
 ```
 
 And you should be running.
