@@ -23,7 +23,8 @@
 
 (def app (ema possible))
 
-(defn -main [yaml-file]
-  (let [resource-definition (-> yaml-file slurp edn/read-string)
-        app (ema resource-definition)]
-    (run-server app {:port 8000})))
+(defn -main
+  ([edn-file]
+     (let [resource-definition (-> edn-file slurp edn/read-string)
+           app (ema resource-definition)]
+       (run-server app {:port 8000}))))
