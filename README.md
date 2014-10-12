@@ -101,11 +101,15 @@ At this point we need to generate our handler.
 
 Now you need to run an instance of MongoDB in your machine, or just change the `uri` key in something more appropriate, like the url of a cloud instance of MongoDB.
 
+Now run the following in your console
+
 ``` bash
 cd
 cd /awesome-name
 lein run
 ```
+
+and you should be ready to go.
 
 Now, if everything went smootly you are serving two REST resource, `user` and `session`.
 
@@ -141,6 +145,24 @@ simo@simo:~/ema$ curl -X POST -d "{\"siscia\" : \"pass\"}" http://localhost:3000
 simo@simo:~/ema$ curl  http://localhost:3000/user
 {"data":[{"_id":"5423934fc8300b83ff02e5fe","siscia":"pass"}]}
 ```
+
+## Docker
+
+I also have packed ema itself as a Docker.
+
+You still need a configuration file in .edn format (a clojure map).
+
+Suppose you have save the configuration file in `/ema/config.edn` to run the docker you need to run the following.
+
+```bash
+sudo docker run --net="host" -v ~/ema/:/ema siscia/ema:lastest "/ema/config.edn" 
+```
+
+And you should be running.
+
+## Issues
+
+For any problem, if you don't find the doc clear or for really anything you can just open an issue here.
 
 ## Contributing
 
