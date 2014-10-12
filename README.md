@@ -44,52 +44,70 @@ lein new awesome-name
 Make the project.clj look like this.
 
 ```clojure
+
 (defproject awesome-name "0.1.0-SNAPSHOT"
   :description "FIXME: write description"
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.6.0"]
-                 [ema "0.0.3"]] ;; added
-  :ring {:handler awesome-name.core/app}) ;;added
+                 [ema "0.0.7"]         ;; added
+                 [http-kit "2.1.19"]]  ;; added
+  :main awesome-name.core)             ;; added
+
 ```
-  
-Note that I have added the dependecies and a ring handler.
+Note that I have added the dependecies.
 
 At this point we need to generate our handler.
 
 ```clojure
 (ns awesome-name.core
-  (:require [ema.core :refer [ema]]))
+  (:require [ema.core :refer [ema]]
+            [org.httpkit.server :refer [run-server]]))
 
 (def setting
-  {:handler :bidi
+  {:key :mongo
+   :handler :bidi
    :uri "mongodb://localhost:27017"
    :database "ema"
    :resources [{:key :mongo
-	            :name "user"
-				:authentication :second
-				:item-entries [:get :patch :delete] ;; miss put
-                :collection-entries [:post :get]}
+                :name "user"
+                :auth :first
+                :item-mth [:patch :delete :post] ;; no `put`
+                :collection-mth [:post]
+                :public-item-mth [:get]
+                :public-collection-mth [:get :post]}
                {:key :mongo
-			    :database "session" ;; attention here
-				:name "session"
-                :item-entries [:put] ;; miss get patch delete
-                :collection-entries [:get :post]}]
-   :authentication {:second {:key :basic
-                             :uri "https://www.auth.com/awesome-app"
-                             :collection "user"
-                             :username "username"
-                             :password "password"}}})
+                :auth :first
+                :database "test" 
+                :name "session"
+                :item-mth [:put] ;; no `get`, `patch` nor `delete`
+                :collection-mth [:post]
+                :public-collection-mth [:get]}]
+   :auth {:first {:key :mongo-dynamics
+                  :database "ema"
+                  :name "user"
+                  :username :username
+                  :password :password
+                  :security :dynamic}}})
 
 (def app
   (ema setting))
+
+(defn -main []
+  (run-server app {:port 8000}))
 
 ```
 
 Now you need to run an instance of MongoDB in your machine, or just change the `uri` key in something more appropriate, like the url of a cloud instance of MongoDB.
 
-	Now, if everything went smootly you are serving two REST resource, `user` and `session`.
+``` bash
+cd
+cd /awesome-name
+lein run
+```
+
+Now, if everything went smootly you are serving two REST resource, `user` and `session`.
 
 Please note the configuration: you won't be able to `put` on `user` nor you will be able to `get`, `patch` and `delete` a single `session`.
 

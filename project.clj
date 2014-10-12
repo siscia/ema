@@ -5,6 +5,7 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [liberator "0.12.2"]
+                 [compojure "1.2.0"] ;; need to be removed
                  [http-kit "2.1.19"]
                  [org.clojure/core.typed "0.2.68"]
                  [cheshire "5.3.1"]
@@ -17,5 +18,4 @@
                  [org.mindrot/jbcrypt "0.3m"]]
   :profiles {:dev {:dependencies [[midje "1.6.3"]]}}
   :main ema.core
-  :ring {:handler ema.core/app}
   :aot [ema.core])

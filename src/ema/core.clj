@@ -22,6 +22,10 @@
       (wrap-trace :header :ui)))
 
 (defn -main
+  ([]
+     (println "Starting ema...")
+     (run-server (ema possible) {:port 8000})
+     (println "Ema ready."))
   ([edn-file]
      (let [resource-definition (-> edn-file slurp edn/read-string)
            app (ema resource-definition)]
