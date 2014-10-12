@@ -1,6 +1,7 @@
 (ns ema.core
-  (:use org.httpkit.server)
-  (:require [clojure.edn :as edn]
+  (:gen-class)
+  (:require [org.httpkit.server :refer [run-server]]
+            [clojure.edn :as edn]
             [liberator.dev :refer [wrap-trace]]
             [ema.implementation :refer [generate-handler generate-asts]]
             [ema.possible :refer [possible]]
@@ -8,8 +9,7 @@
             [ring.middleware.basic-authentication :refer [wrap-basic-authentication]]
             [ema.mongo]
             [ema.authentication]
-            [ema.routes-gen])
-  (:gen-class))
+            [ema.routes-gen]))
 
 (defn ema [m]
   (-> m
@@ -20,8 +20,6 @@
                                    {:username u
                                     :password p}))
       (wrap-trace :header :ui)))
-
-(def app (ema possible))
 
 (defn -main
   ([edn-file]

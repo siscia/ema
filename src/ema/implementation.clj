@@ -1,7 +1,7 @@
 (ns ema.implementation
-  (:require [clojure.core.typed :as t]
-            ;;[ema.type :refer [EntryMap ResourceDefinition PreResourceDefinition]]
-            ))
+  ;; (:require [clojure.core.typed :as t]
+  ;;           [ema.type :refer [EntryMap ResourceDefinition PreResourceDefinition]])
+  )
 
 ;; Dictionary:
 ;; + entry-map, the map that the user provides. An example is ema.possible/possible

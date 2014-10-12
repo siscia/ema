@@ -1,6 +1,5 @@
 (ns ema.routes-gen
   (:require [ema.implementation :refer [generate-handler]]
-            [liberator.core :refer [resource]]
             [bidi.bidi :refer [make-handler]]
             [ring.middleware.multipart-params :refer [wrap-multipart-params]]))
 
