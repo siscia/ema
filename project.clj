@@ -12,7 +12,6 @@
                  [ring/ring-defaults "0.1.2"]
                  [ring/ring-json "0.3.1"]
                  [com.novemberain/monger "2.0.0"]
-                 [compojure "1.1.9"]
                  [bidi "1.10.5"]
                  [ring-basic-authentication "1.0.5"]
                  [org.mindrot/jbcrypt "0.3m"]]
