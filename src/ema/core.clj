@@ -5,6 +5,7 @@
             [liberator.dev :refer [wrap-trace]]
             [ema.implementation :refer [generate-handler generate-asts]]
             [ema.possible :refer [possible]]
+            [ring.middleware.params :refer [wrap-params]]
             [ring.middleware.multipart-params :refer [wrap-multipart-params]]
             [ring.middleware.basic-authentication :refer [wrap-basic-authentication]]
             [ema.mongo]
@@ -15,7 +16,7 @@
   (-> m
       generate-asts
       generate-handler
-      wrap-multipart-params
+      wrap-params
       (wrap-basic-authentication (fn [u p]
                                    {:username u
                                     :password p}))
