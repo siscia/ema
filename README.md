@@ -22,11 +22,11 @@ The project has just started thus it is not mature enough for any use.
 * MongoDB layer
 * bidi (routing) layer
 * Authentication
+* GET search
 
 ### To Be Implemented
 
 * Manage Middleware
-* GET search
 * SQL layer
 
 ## Usage
