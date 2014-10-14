@@ -76,7 +76,6 @@
                                                                 (::resource ctx)
                                                                 (::data ctx)))})
    :handle-exception (fn [ctx]
-                       (println (:exception ctx))
                        (throw (:exception ctx)))
    :respond-with-entity? true
    :can-put-to-missing? true
@@ -84,14 +83,14 @@
    :put! (fn [ctx]
            (let [putted (mc/save-and-return db coll (merge-with merge
                                                                 (::resource ctx)
-                                                                (::data ctx)))
-                 _ (println putted)]
+                                                                (::data ctx)))]
              {::putted putted}))
-   :new? #(boolean (::resource %))
+   :new? #(boolean (not (::resource %)))
+   :handle-created #(generate-string (::putted %))
    :handle-ok (fn [ctx]
                 (case (get-in ctx [:request :request-method])
                   :get (generate-string (::resource ctx))
-                  :put (do (println (::putted ctx)) (generate-string (::putted ctx)))
+                  :put (generate-string (::putted ctx))
                   :patch (generate-string (::patched ctx))
                   :delete {:message "Eliminated resource"
                            :resource (generate-string (::resource ctx))}))})
@@ -99,7 +98,6 @@
 (defn item-entries [m id]
   (let [{:keys [conn db]} (mg/connect-via-uri (:uri m))
         coll (:name m)]
-    (println "\n\n\nThe id is:" id "\n\n\n")
     (map-item-entries m id conn db coll)))
 
 (defn item-entries-value
