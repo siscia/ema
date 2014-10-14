@@ -39,7 +39,9 @@
    :handle-created (fn [ctx]
                      (generate-string (::new ctx)))
    :handle-ok (fn [ctx]
-                (generate-string {:data (mc/find-maps db coll)}))})
+                (let [query (get-in ctx [:request :query-params])
+                      _ (println query)]
+                  (generate-string {:data (mc/find-maps db coll query)})))})
 
 (defn collection-entries [definition-map]
   (let [{:keys [conn db]} (mg/connect-via-uri (:uri definition-map))
@@ -48,50 +50,56 @@
 
 (defn map-item-entries [m id conn db coll]
   {:allowed-methods (concat (:item-mth m) (:public-item-mth m))
-     :available-media-types ["text/plain" "application/json"]
-     :malformed? (fn [ctx]
-                   (let [id-check (not-valid-id? id)]
-                     (if-not (first id-check)
-                       (parse-json-malformed ctx ::data)
-                       id-check)))
-     :allowed? (fn [ctx]
-                    (if (some #{(-> ctx :request :request-method)}
-                              (:public-item-mth m))
-                      true
-                      (authentication (:auth m) ctx)))
-     :handle-malformed #(generate-string (::malformed-message %))
-     :exists? (fn [ctx]
-                (let [resource (mc/find-map-by-id db coll (ObjectId. id))]
-                  (if-not (empty? resource)
-                    [true {::resource resource}]
-                    [false {::not-found-message (str "The resource with id \"" id "\" doesn't exist.")}])))
-     :handle-not-found #(generate-string (::not-found-message %))
-     :multiple-reppresentation? false
-     :delete! #(mc/remove-by-id db coll (ObjectId. id))
-     :delete-enacted? true
-     :patch! (fn [ctx]
-               {::patched (mc/save-and-return db coll (merge-with merge (::resource ctx) (::data ctx)))})
-     :handle-exception (fn [ctx]
-                         (println (:exception ctx))
-                         (throw (:exception ctx)))
-     :respond-with-entity? true
-     :can-put-to-missing? true
-      :conflict? false
-     :put! (fn [ctx]
-             {::putted (mc/save-and-return db coll (merge-with merge (::resource ctx)
-                                                               (assoc (::data ctx) :_id (ObjectId. id))))})
-     :new? #(boolean (::resource %))
-     :handle-ok (fn [ctx]
-                  (case (get-in ctx [:request :request-method])
-                    :get (generate-string (::resource ctx))
-                    :put (generate-string (::putted ctx))
-                    :patch (generate-string (::patched ctx))
-                    :delete {:message "Eliminated resource"
-                             :resource (generate-string (::resource ctx))}))})
+   :available-media-types ["text/plain" "application/json"]
+   :malformed? (fn [ctx]
+                 (let [id-check (not-valid-id? id)]
+                   (if-not (first id-check)
+                     (parse-json-malformed ctx ::data)
+                     id-check)))
+   :allowed? (fn [ctx]
+               (if (some #{(-> ctx :request :request-method)}
+                         (:public-item-mth m))
+                 true
+                 (authentication (:auth m) ctx)))
+   :handle-malformed #(generate-string (::malformed-message %))
+   :exists? (fn [ctx]
+              (let [resource (mc/find-map-by-id db coll (ObjectId. id))]
+                (if-not (empty? resource)
+                  [true {::resource resource}]
+                  [false {::not-found-message (str "The resource with id \"" id "\" doesn't exist.")}])))
+   :handle-not-found #(generate-string (::not-found-message %))
+   :multiple-reppresentation? false
+   :delete! #(mc/remove-by-id db coll (ObjectId. id))
+   :delete-enacted? true
+   :patch! (fn [ctx]
+             {::patched (mc/save-and-return db coll (merge-with merge
+                                                                (::resource ctx)
+                                                                (::data ctx)))})
+   :handle-exception (fn [ctx]
+                       (println (:exception ctx))
+                       (throw (:exception ctx)))
+   :respond-with-entity? true
+   :can-put-to-missing? true
+   :conflict? false
+   :put! (fn [ctx]
+           (let [putted (mc/save-and-return db coll (merge-with merge
+                                                                (::resource ctx)
+                                                                (::data ctx)))
+                 _ (println putted)]
+             {::putted putted}))
+   :new? #(boolean (::resource %))
+   :handle-ok (fn [ctx]
+                (case (get-in ctx [:request :request-method])
+                  :get (generate-string (::resource ctx))
+                  :put (do (println (::putted ctx)) (generate-string (::putted ctx)))
+                  :patch (generate-string (::patched ctx))
+                  :delete {:message "Eliminated resource"
+                           :resource (generate-string (::resource ctx))}))})
 
 (defn item-entries [m id]
   (let [{:keys [conn db]} (mg/connect-via-uri (:uri m))
         coll (:name m)]
+    (println "\n\n\nThe id is:" id "\n\n\n")
     (map-item-entries m id conn db coll)))
 
 (defn item-entries-value
