@@ -51,7 +51,7 @@ Make the project.clj look like this.
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.6.0"]
-                 [ema "0.0.7"]         ;; added
+                 [ema "0.0.x"]         ;; added
                  [http-kit "2.1.19"]]  ;; added
   :main awesome-name.core)             ;; added
 
