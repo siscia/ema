@@ -1,8 +1,9 @@
 (ns ema.possible
-  (:require [clojure.core.typed :as t]
-            [ema.type :refer [EntryMap]]))
+  ;; (:require [clojure.core.typed :as t]
+  ;;           [ema.type :refer [EntryMap]])
+  )
 
-(t/ann possible EntryMap)
+;; (t/ann possible EntryMap)
 (def possible
   {:key :mongo
    :handler :bidi
