@@ -160,6 +160,33 @@ sudo docker run --net="host" -v ~/ema/:/ema siscia/ema:latest "/ema/config.edn"
 
 And you should be running.
 
+## Keep it small
+
+`ema` has a lot of dependecies, most of them necessaries.
+
+If you develop a web app it may be possible that your code has some common dependencies with `ema` itself.
+
+I am thinking about libraries like `http-kit` or `monger`.
+
+If this is the case, right now, you could just exclude such dependencies from `ema`.
+
+Taking as example the previous `project.clj`, it could be written as:
+
+```clojure
+(defproject awesome-name "0.1.0-SNAPSHOT"
+  :description "FIXME: write description"
+  :url "http://example.com/FIXME"
+  :license {:name "Eclipse Public License"
+            :url "http://www.eclipse.org/legal/epl-v10.html"}
+  :dependencies [[org.clojure/clojure "1.6.0"]
+                 [ema "0.0.8" :exclusions [[http-kit]]] ;; added the exclusion
+                 [http-kit "2.1.19"]]  ;; you already have imported an http-kit
+  :main awesome-name.core)             
+
+```
+
+As long as you keep your dependecies up to date this approach will work fine.
+
 ## Issues
 
 For any problem, if you don't find the doc clear or for really anything you can just open an issue here.
