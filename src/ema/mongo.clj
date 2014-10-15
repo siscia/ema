@@ -1,5 +1,5 @@
 (ns ema.mongo
-  (:require [monger.core :as mg]
+  (:require [monger.core :refer [connect-via-uri]]
             [monger.collection :as mc]
             [cheshire.core :refer [parse-string generate-string]]
             [cheshire.generate :refer [add-encoder encode-str]]
@@ -44,7 +44,7 @@
                   (generate-string {:data (mc/find-maps db coll query)})))})
 
 (defn collection-entries [definition-map]
-  (let [{:keys [conn db]} (mg/connect-via-uri (:uri definition-map))
+  (let [{:keys [conn db]} (connect-via-uri (:uri definition-map))
         coll (:name definition-map)]
     (map-collection-entries definition-map conn db coll)))
 
@@ -96,7 +96,7 @@
                            :resource (generate-string (::resource ctx))}))})
 
 (defn item-entries [m id]
-  (let [{:keys [conn db]} (mg/connect-via-uri (:uri m))
+  (let [{:keys [conn db]} (connect-via-uri (:uri m))
         coll (:name m)]
     (map-item-entries m id conn db coll)))
 
