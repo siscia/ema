@@ -39,8 +39,7 @@
    :handle-created (fn [ctx]
                      (generate-string (::new ctx)))
    :handle-ok (fn [ctx]
-                (let [query (get-in ctx [:request :query-params])
-                      _ (println query)]
+                (let [query (get-in ctx [:request :query-params])]
                   (generate-string {:data (mc/find-maps db coll query)})))})
 
 (defn collection-entries [definition-map]
@@ -129,8 +128,11 @@
                :value collection-entries-value}]))
 
 (defn generate-mongo-asts [m]
-  (let [definition-maps (generate-resource-definition m)]
-    (flatten (map definition-map-2-ast definition-maps))))
+  (let [definition-maps (generate-resource-definition m)
+        asts (map definition-map-2-ast definition-maps)]
+    (println definition-map)
+    (println asts)
+    (flatten asts)))
 
 (defmethod custom-inject :mongo [coll entry-map]
   (let [with-database (merge
