@@ -5,9 +5,7 @@
 
 ;; Dictionary:
 ;; + entry-map, the map that the user provides. An example is ema.possible/possible
-
 ;; + resources-def(inition), a map which contains all the information necessary to serve a resource.
-
 ;; + resource-pre-definition, in the code as `res-pre`, are an incomplete definition of a resource, such maps will be manipulated and integrated with the values in the entry-map to yield a resource-definition.
 
 
@@ -89,10 +87,10 @@ Custom authentication layer are suppose to provide an implementation."
   (assoc res-pre :auth (:auth entry-map)))
 
 ;;(t/ann inject-basic-key [PreResourceDefinition EntryMap -> ResourceDefinition])
-(defn inject-basic-keys
-  "Inject in the pre-res map the foundamental keys, from the entry-map, that are not already present."
+(defn inject-keys
+  "Inject in the pre-res map all the keys, from the entry-map, that are not already present."
   [res-pre entry-map]
-  (merge (select-keys entry-map [:key :handler :uri :connection]) res-pre))
+  (merge entry-map res-pre))
 
 ;;(t/ann define-resource [EntryMap -> (t/Fn [PreResourceDefinition -> ResourceDefinition])])
 (defn define-resource
@@ -103,7 +101,7 @@ Custom authentication layer are suppose to provide an implementation."
   [entry-map]
   (fn [res-pre]
     (-> res-pre
-        (inject-basic-keys entry-map)
+        (inject-keys entry-map)
         (auth-inject entry-map)
         (custom-inject entry-map)
         (custom-auth-inject entry-map))))
