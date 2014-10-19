@@ -2,11 +2,12 @@
  :handler :bidi
  :uri "mongodb://localhost:27017"
  :database "ema"
- :connection {"user" [{:resource "session"
-                       :field "sessionID"}
-                      {:resource "session"
-                       :field "storicSessionsID"
-                       :type :list}]}
+ :connections {"user" [{:resource "session"
+                        :field "sessionID"}
+                       {:resource "session"
+                        :field "storicSessionsID"
+                        :type :list}]}
+ 
  :resources [{:key :mongo
               :name "user"
               :auth :first

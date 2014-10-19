@@ -1,6 +1,6 @@
-(ns ema.mongo-t
+(ns ema.mongo.resource-t
   (:use midje.sweet)
-  (:require [ema.mongo :refer [parse-json-malformed not-valid-id? map-collection-entries]]
+  (:require [ema.mongo.resource :refer [parse-json-malformed not-valid-id? resource-collection-entries]]
             [ema.implementation :refer [authentication]]))
 
 (facts
@@ -14,13 +14,13 @@
   (parse-json-malformed
    {:request
     {:request-method :post
-     :body nil}} nil) => [true {:ema.mongo/malformed-message "No body"}])
+     :body nil}} nil) => [true {:ema.mongo.resource/malformed-message "No body"}])
  (fact
   "Check for malformed JSON"
   (parse-json-malformed
    {:request
     {:request-method :put
-     :body "Wrong JSON"}} nil) => [true {:ema.mongo/malformed-message "Malformed JSON"}])
+     :body "Wrong JSON"}} nil) => [true {:ema.mongo.resource/malformed-message "Malformed JSON"}])
  (fact
   "Check good JSON"
   (parse-json-malformed
@@ -34,7 +34,7 @@
  "Checking validit of id"
  (fact
   "Check wrong id"
-  (not-valid-id? "random") => [true {:ema.mongo/malformed-message "ID: \"random\" not valid. Please check: http://api.mongodb.org/java/2.0/org/bson/types/ObjectId.html"}])
+  (not-valid-id? "random") => [true {:ema.mongo.resource/malformed-message "ID: \"random\" not valid. Please check: http://api.mongodb.org/java/2.0/org/bson/types/ObjectId.html"}])
  (fact
   "Check rigth id"
   (not-valid-id? "5434f6a7c830d077e497782e") => [false {}]))
@@ -43,9 +43,9 @@
  (let [definition-map {:public-collection-mth [:post :patch]
                        :collection-mth [:get]
                        :auth ..auth..} 
-       resource-map (map-collection-entries
+       resource-map (resource-collection-entries
                      definition-map
-                     :conn :db :coll)
+                     :db :coll)
        rm resource-map]
    (fact
     "check allowed-methods"

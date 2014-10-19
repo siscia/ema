@@ -92,7 +92,7 @@ Custom authentication layer are suppose to provide an implementation."
 (defn inject-basic-keys
   "Inject in the pre-res map the foundamental keys, from the entry-map, that are not already present."
   [res-pre entry-map]
-  (merge (select-keys entry-map [:key :handler :uri]) res-pre))
+  (merge (select-keys entry-map [:key :handler :uri :connection]) res-pre))
 
 ;;(t/ann define-resource [EntryMap -> (t/Fn [PreResourceDefinition -> ResourceDefinition])])
 (defn define-resource
