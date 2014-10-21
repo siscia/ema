@@ -13,7 +13,6 @@
 ;; + coll : string, the collection at which the resource belong
 ;; + id : string, id of the resource
 
-
 (defn not-valid-id? [id]
     (if (org.bson.types.ObjectId/isValid id)
       [false {}]

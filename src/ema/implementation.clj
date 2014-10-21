@@ -19,6 +19,10 @@
   "Custom implementation layer are suppose to provide an implementation."
   :key)
 
+(defmulti connection
+  "Custom implementation layer are suppose to provide an implementation."
+  (fn [res-def] (:key res-def)))
+
 ;; (t/ann custom-resource-definition [ResourceDefinition EntryMap -> ResourceDefinition])
 (defmulti custom-inject
   "This function is suppose to be used as entry point by the custom layers. A custom layer can redefine this function as its own will adding and modify whatever key it need."
