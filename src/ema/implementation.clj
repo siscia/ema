@@ -23,6 +23,14 @@
   "Custom implementation layer are suppose to provide an implementation."
   (fn [res-def] (:key res-def)))
 
+(defmulti basic-get
+  "It is used to make connections between the various resource.
+  Custom implementation layer are suppose to provide an implementation.
+  + key has the same meaning of :key in any other multimethods.
+  + id is the id of the resource to connect.
+  + conn is a map that comes out the connection multimethod."
+  (fn [key id conn] key))
+
 ;; (t/ann custom-resource-definition [ResourceDefinition EntryMap -> ResourceDefinition])
 (defmulti custom-inject
   "This function is suppose to be used as entry point by the custom layers. A custom layer can redefine this function as its own will adding and modify whatever key it need."

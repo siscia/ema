@@ -30,7 +30,7 @@
       [true {::malformed-message "No body"}])))
 
 
-(defn resource-collection-entries [m db coll]
+(defn resource-collection-entries [m {:keys [db coll]}]
   {:allowed-methods (concat (:collection-mth m) (:public-collection-mth m))
    :available-media-types ["text/plain" "application/json"]
    :allowed? (fn [ctx]
@@ -49,7 +49,7 @@
                   (generate-string {:data (mc/find-maps db coll query)})))})
 
 
-(defn resource-item-entries [m id db coll]
+(defn resource-item-entries [m id {:keys [db coll]}]
   {:allowed-methods (concat (:item-mth m) (:public-item-mth m))
    :available-media-types ["text/plain" "application/json"]
    :malformed? (fn [ctx]

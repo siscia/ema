@@ -1,8 +1,10 @@
 (ns ema.mongo
   (:require [monger.core :refer [connect-via-uri]]
+            [monger.collection :refer [find-map-by-id]]
             [liberator.core :refer [resource]]
-            [ema.implementation :refer [generate-asts generate-resource-definition custom-inject connection]]
-            [ema.mongo.resource :refer [resource-collection-entries resource-item-entries]]))
+            [ema.implementation :refer [generate-asts generate-resource-definition custom-inject connection basic-get]]
+            [ema.mongo.resource :refer [resource-collection-entries resource-item-entries]])
+  (:import org.bson.types.ObjectId))
 
 ;; Dictionary
 ;; + res-def (resource-definition) : map, contains all the information to define a single resource
@@ -14,15 +16,14 @@
     (assoc con-map
       :coll (:name res-def))))
 
+(defmethod basic-get :mongo [_key_ id {:keys [db coll]}]
+  (find-map-by-id db coll (ObjectId. id)))
+
 (defn collection-entries [res-def]
-  (let [{:keys [conn db]} (connect-via-uri (:uri res-def))
-        coll (:name res-def)]
-    (resource-collection-entries res-def db coll)))
+  (resource-collection-entries res-def (connection res-def)))
 
 (defn item-entries [res-def id]
-  (let [{:keys [conn db]} (connect-via-uri (:uri res-def))
-        coll (:name res-def)]
-    (resource-item-entries res-def id db coll)))
+  (resource-item-entries res-def id (connection res-def)))
 
 (defn item-entries-value
   [res-def]
@@ -39,13 +40,13 @@
    :route (:name res-def)
    :resource (resource (collection-entries res-def))})
 
-(defn reducing-f [res-def]
+(defn reducing-f [res-def] ;; this code is too complex, need to be rewriten
   (fn [v {:keys [predicate value]}]
     (if (predicate res-def)
       (conj v (merge res-def (value res-def)))
       v)))
 
-(defn res-def-2-ast [res-def]
+(defn res-def-2-ast [res-def] ;; code to complex
   (reduce (reducing-f res-def)
           [] [{:predicate (fn [dm] (contains? dm :item-mth))
                :value item-entries-value}

@@ -45,7 +45,7 @@
                        :auth ..auth..} 
        resource-map (resource-collection-entries
                      definition-map
-                     :db :coll)
+                     {:db :db :coll :coll})
        rm resource-map]
    (fact
     "check allowed-methods"
