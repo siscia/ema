@@ -26,8 +26,10 @@
   ([]
      (println "Starting ema...")
      (run-server (ema possible) {:port 8000})
-     (println "Ema ready."))
+     (println "ema is ready :)"))
   ([edn-file]
+     (println "Startin ema...")
      (let [resource-definition (-> edn-file slurp edn/read-string)
            app (ema resource-definition)]
-       (run-server app {:port 8000}))))
+       (run-server app {:port 8000})
+       (println "ema is ready :)"))))

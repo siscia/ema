@@ -16,7 +16,7 @@
     (assoc con-map
       :coll (:name res-def))))
 
-(defmethod basic-get :mongo [_key_ id {:keys [db coll]}]
+(defmethod basic-get :mongo [_key_ {:keys [db coll]} id]
   (find-map-by-id db coll (ObjectId. id)))
 
 (defn collection-entries [res-def]

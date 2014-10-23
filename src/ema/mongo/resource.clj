@@ -30,14 +30,14 @@
       [true {::malformed-message "No body"}])))
 
 
-(defn resource-collection-entries [m {:keys [db coll]}]
-  {:allowed-methods (concat (:collection-mth m) (:public-collection-mth m))
+(defn resource-collection-entries [res-def {:keys [db coll] :as connection}]
+  {:allowed-methods (concat (:collection-mth res-def) (:public-collection-mth res-def))
    :available-media-types ["text/plain" "application/json"]
    :allowed? (fn [ctx]
                (if (some #{(-> ctx :request :request-method)}
-                         (:public-collection-mth m))
+                         (:public-collection-mth res-def))
                  true
-                 (authentication (:auth m) ctx)))
+                 (authentication (:auth res-def) ctx)))
    :malformed? #(parse-json-malformed % ::data)
    :post! (fn [ctx] {::new (mc/insert-and-return db coll (::data ctx))})
    :post-redirect? false
@@ -49,8 +49,8 @@
                   (generate-string {:data (mc/find-maps db coll query)})))})
 
 
-(defn resource-item-entries [m id {:keys [db coll]}]
-  {:allowed-methods (concat (:item-mth m) (:public-item-mth m))
+(defn resource-item-entries [res-def id {:keys [db coll] :as connection}]
+  {:allowed-methods (concat (:item-mth res-def) (:public-item-mth res-def))
    :available-media-types ["text/plain" "application/json"]
    :malformed? (fn [ctx]
                  (let [id-check (not-valid-id? id)]
@@ -59,9 +59,9 @@
                      id-check)))
    :allowed? (fn [ctx]
                (if (some #{(-> ctx :request :request-method)}
-                         (:public-item-mth m))
+                         (:public-item-mth res-def))
                  true
-                 (authentication (:auth m) ctx)))
+                 (authentication (:auth res-def) ctx)))
    :handle-malformed #(generate-string (::malformed-message %))
    :exists? (fn [ctx]
               (let [resource (mc/find-map-by-id db coll (ObjectId. id))]

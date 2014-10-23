@@ -99,10 +99,25 @@ Custom authentication layer are suppose to provide an implementation."
   (assoc res-pre :auth (:auth entry-map)))
 
 ;;(t/ann inject-basic-key [PreResourceDefinition EntryMap -> ResourceDefinition])
-(defn inject-keys
+(defn keys-inject
   "Inject in the pre-res map all the keys, from the entry-map, that are not already present."
   [res-pre entry-map]
   (merge entry-map res-pre))
+
+(defn connection-inject
+  [res-pre]
+  (assoc-in res-pre
+            [:meta :connection]
+            (connection res-pre)))
+
+(defn basic-get-inject
+  [res-pre]
+  {:pre [#(get-in res-pre [:meta :connection])]}
+  (assoc-in res-pre
+            [:meta :basic-get]
+            (partial basic-get
+                     (:key res-pre)
+                     (get-in res-pre [:meta :connection]))))
 
 ;;(t/ann define-resource [EntryMap -> (t/Fn [PreResourceDefinition -> ResourceDefinition])])
 (defn define-resource
@@ -113,10 +128,28 @@ Custom authentication layer are suppose to provide an implementation."
   [entry-map]
   (fn [res-pre]
     (-> res-pre
-        (inject-keys entry-map)
+        (keys-inject entry-map)
         (auth-inject entry-map)
         (custom-inject entry-map)
-        (custom-auth-inject entry-map))))
+        (custom-auth-inject entry-map)
+        connection-inject
+        basic-get-inject)))
+
+(defn find-resorces-def [resources-def name]
+  (first (filter #(= (:name %) name) resources-def)))
+
+(defn links-creator [conns res-defs]
+  (let [create-link (fn )]
+    (fn [resource]
+      (merge resource create-link))))
+
+(defn add-connections [res-defs {:keys [connections] :as entry-map}]
+  (map (fn [res-def]
+         (let [conns (get connections (:name resource))
+               links-creator (links-creator conns)]
+           (assoc-in res-def
+                     [:meta :links-creator]
+                     ))) res-defs))
 
 ;;(t/ann generate-resource-definition [EntryMap -> (t/Seq ResourceDefinition)])
 (defn generate-resource-definition
