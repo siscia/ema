@@ -135,21 +135,28 @@ Custom authentication layer are suppose to provide an implementation."
         connection-inject
         basic-get-inject)))
 
-(defn find-resorces-def [resources-def name]
+(defn find-resorces-def [name resources-def]
   (first (filter #(= (:name %) name) resources-def)))
 
 (defn links-creator [conns res-defs]
-  (let [create-link (fn )]
-    (fn [resource]
-      (merge resource create-link))))
+  (let [create-link
+        (fn [conn res]
+          (if-let [id (get res (:field conn))]
+            (let [res-conn (-> conns
+                               :resource
+                               (find-resorces-def res-defs))
+                  basic-get (get-in res-conn [:meta :basic-get])]
+              (assoc res (:field conn) (basic-get id)))))]
+    
+    (map (fn [conn] (partial create-link conn)) conns)))
 
 (defn add-connections [res-defs {:keys [connections] :as entry-map}]
   (map (fn [res-def]
-         (let [conns (get connections (:name resource))
+         (let [conns (get connections (:name res-def))
                links-creator (links-creator conns)]
            (assoc-in res-def
                      [:meta :links-creator]
-                     ))) res-defs))
+                     links-creator))) res-defs))
 
 ;;(t/ann generate-resource-definition [EntryMap -> (t/Seq ResourceDefinition)])
 (defn generate-resource-definition
