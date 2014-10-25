@@ -142,14 +142,18 @@ Custom authentication layer are suppose to provide an implementation."
 (defn links-creator [conns res-defs]
   (let [create-link
         (fn [conn res]
+          (println "conn:> " conn)
+          (println "res:> " res)
           (if-let [id (get res (:field conn))]
-            (let [res-conn (-> conns
+            (let [_ (println "id:>" id)
+                  res-conn (-> conn
                                :resource
                                (find-resorces-def res-defs))
                   basic-get (get-in res-conn [:meta :basic-get])]
               (assoc res (:field conn) (if (sequential? id)
                                          (mapv basic-get id)
-                                         (basic-get id))))))]
+                                         (basic-get id))))
+            res))]
     
     (map (fn [conn] (partial create-link conn)) conns)))
 
@@ -163,9 +167,13 @@ Custom authentication layer are suppose to provide an implementation."
                      links))) res-defs))
 
 (defn connect-resource [res-def resource]
+  (println resource)
   (let [fs-connect (get-in res-def [:meta :links-creator])
         f (apply comp fs-connect)]
-    (f res-def)))
+    (when f
+      (do
+        (println (f resource))
+        (f resource)))))
 
 ;;(t/ann generate-resource-definition [EntryMap -> (t/Seq ResourceDefinition)])
 (defn generate-resource-definition

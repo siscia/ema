@@ -4,9 +4,9 @@
  :database "ema"
  
  :connections {"user" [{:resource "session"
-                        :field "sessionID"}
+                        :field :sessionID}
                        {:resource "session"
-                        :field "storicSessionsID"
+                        :field :storicSessionsID
                         :type :list}]}
  
  :resources [{:key :mongo
@@ -14,7 +14,7 @@
               :auth :first
               :item-mth [:put :patch :delete :post]
               :collection-mth [:post]
-              :public-item-mth [:get]
+              :public-item-mth [:get :put :patch :delete]
               :public-collection-mth [:get :post]}
              {:key :mongo
               :auth :first
@@ -22,7 +22,7 @@
               :name "session"
               :item-mth [:put]
               :collection-mth [:post]
-              :public-collection-mth [:get]}]
+              :public-collection-mth [:get :post :put]}]
  
  :auth {:first {:key :mongo-dynamics
                 :database "ema"
