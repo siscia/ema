@@ -136,6 +136,7 @@ Custom authentication layer are suppose to provide an implementation."
         basic-get-inject)))
 
 (defn find-resorces-def [name resources-def]
+  "Given a name (string) and a seq of resource-definition, find the resource definition with the given name."
   (first (filter #(= (:name %) name) resources-def)))
 
 (defn links-creator [conns res-defs]
@@ -146,21 +147,30 @@ Custom authentication layer are suppose to provide an implementation."
                                :resource
                                (find-resorces-def res-defs))
                   basic-get (get-in res-conn [:meta :basic-get])]
-              (assoc res (:field conn) (basic-get id)))))]
+              (assoc res (:field conn) (if (sequential? id)
+                                         (mapv basic-get id)
+                                         (basic-get id))))))]
     
     (map (fn [conn] (partial create-link conn)) conns)))
 
 (defn add-connections [res-defs {:keys [connections] :as entry-map}]
   (map (fn [res-def]
          (let [conns (get connections (:name res-def))
-               links-creator (links-creator conns)]
+               links (links-creator conns res-defs)
+               _ (println "\n\nLinks:> " links "\n\n")]
            (assoc-in res-def
                      [:meta :links-creator]
-                     links-creator))) res-defs))
+                     links))) res-defs))
+
+(defn connect-resource [res-def resource]
+  (let [fs-connect (get-in res-def [:meta :links-creator])
+        f (apply comp fs-connect)]
+    (f res-def)))
 
 ;;(t/ann generate-resource-definition [EntryMap -> (t/Seq ResourceDefinition)])
 (defn generate-resource-definition
   "Given an entry-map the function will return a sequence of resource-definition."
   [{:keys [resources] :as entry-map}]
-  (let [resources-def (map (define-resource entry-map) resources)]
-    resources-def))
+  (let [res-def (map (define-resource entry-map) resources)
+        linked-res (add-connections res-def entry-map)]
+    linked-res))
