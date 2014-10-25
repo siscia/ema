@@ -18,6 +18,7 @@
                                              org.clojure/tools.reader]]
                  [ring-basic-authentication "1.0.5"]
                  [org.mindrot/jbcrypt "0.3m"]]
-  :profiles {:dev {:dependencies [[midje "1.6.3"]]}}
+  :profiles {:dev {:dependencies [[midje "1.6.3"]
+                                  [compojure "1.2.1"]]}}
   :main ema.core
   :aot [ema.core])
