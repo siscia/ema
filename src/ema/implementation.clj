@@ -29,7 +29,7 @@
   + key has the same meaning of :key in any other multimethods.
   + id is the id of the resource to connect.
   + conn is a map that comes out the connection multimethod."
-  (fn [key id conn] key))
+  (fn [key conn id] key))
 
 ;; (t/ann custom-resource-definition [ResourceDefinition EntryMap -> ResourceDefinition])
 (defmulti custom-inject
@@ -149,7 +149,10 @@ Custom authentication layer are suppose to provide an implementation."
                   res-conn (-> conn
                                :resource
                                (find-resorces-def res-defs))
-                  basic-get (get-in res-conn [:meta :basic-get])]
+                  basic-get (get-in res-conn [:meta :basic-get])
+                  ;;next-conn (get conns (:resource conn))
+                  ;;next-resource #(create-link next-conn (basic-get %))
+                  ]
               (assoc res (:field conn) (if (sequential? id)
                                          (mapv basic-get id)
                                          (basic-get id))))
@@ -160,8 +163,7 @@ Custom authentication layer are suppose to provide an implementation."
 (defn add-connections [res-defs {:keys [connections] :as entry-map}]
   (map (fn [res-def]
          (let [conns (get connections (:name res-def))
-               links (links-creator conns res-defs)
-               _ (println "\n\nLinks:> " links "\n\n")]
+               links (links-creator conns res-defs)]
            (assoc-in res-def
                      [:meta :links-creator]
                      links))) res-defs))
