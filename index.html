@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <title>Ema by siscia</title>
+  </head>
+
+  <body>
+    <header>
+      <div class="inner">
+        <h1>Ema</h1>
+        <h2></h2>
+        <a href="https://github.com/siscia/ema" class="button"><small>View project on</small> GitHub</a>
+      </div>
+    </header>
+
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+          <h1>
+<a name="ema" class="anchor" href="#ema"><span class="octicon octicon-link"></span></a>ema</h1>
+
+<p><img src="https://raw.githubusercontent.com/siscia/ema/master/resources/logo/ema.jpeg" alt="ema"></p>
+
+<p><code>Ema</code> provides a simple and easy abstraction to build REST service.</p>
+
+<p><code>Ema</code> is a very little library built on top of <a href="http://clojure-liberator.github.io/liberator/">Liberator</a>.</p>
+
+<p>The main idea is too provide a simple and yet powerful abstraction over Liberator itself.</p>
+
+<h2>
+<a name="dependencies" class="anchor" href="#dependencies"><span class="octicon octicon-link"></span></a>Dependencies</h2>
+
+<p><a href="http://clojars.org/ema"><img src="http://clojars.org/ema/latest-version.svg" alt="Clojars Project"></a></p>
+
+<h2>
+<a name="maturity" class="anchor" href="#maturity"><span class="octicon octicon-link"></span></a>Maturity</h2>
+
+<p>The project has just started thus it is not mature enough for any use.</p>
+
+<h3>
+<a name="implemented" class="anchor" href="#implemented"><span class="octicon octicon-link"></span></a>Implemented</h3>
+
+<ul>
+<li>MongoDB layer</li>
+<li>bidi (routing) layer</li>
+<li>Authentication</li>
+<li>GET search</li>
+</ul>
+
+<h3>
+<a name="to-be-implemented" class="anchor" href="#to-be-implemented"><span class="octicon octicon-link"></span></a>To Be Implemented</h3>
+
+<ul>
+<li>Manage Middleware</li>
+<li>SQL layer</li>
+</ul>
+
+<h2>
+<a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>Usage</h2>
+
+<p>The project is still unusable for any non-trivial project.</p>
+
+<p>However you can already have an idea of the way to use <code>Ema</code></p>
+
+<p>Create a new clojure project</p>
+
+<div class="highlight highlight-clojure"><pre><span class="nv">lein</span> <span class="k">new </span><span class="nv">awesome-name</span>
+</pre></div>
+
+<p>Make the project.clj look like this.</p>
+
+<div class="highlight highlight-clojure"><pre>
+<span class="p">(</span><span class="kd">defproject </span><span class="nv">awesome-name</span> <span class="s">"0.1.0-SNAPSHOT"</span>
+  <span class="ss">:description</span> <span class="s">"FIXME: write description"</span>
+  <span class="ss">:url</span> <span class="s">"http://example.com/FIXME"</span>
+  <span class="ss">:license</span> <span class="p">{</span><span class="ss">:name</span> <span class="s">"Eclipse Public License"</span>
+            <span class="ss">:url</span> <span class="s">"http://www.eclipse.org/legal/epl-v10.html"</span><span class="p">}</span>
+  <span class="ss">:dependencies</span> <span class="p">[[</span><span class="nv">org.clojure/clojure</span> <span class="s">"1.6.0"</span><span class="p">]</span>
+                 <span class="p">[</span><span class="nv">ema</span> <span class="s">"0.0.x"</span><span class="p">]</span>         <span class="c1">;; added</span>
+                 <span class="p">[</span><span class="nv">http-kit</span> <span class="s">"2.1.19"</span><span class="p">]]</span>  <span class="c1">;; added</span>
+  <span class="ss">:main</span> <span class="nv">awesome-name.core</span><span class="p">)</span>             <span class="c1">;; added</span>
+
+</pre></div>
+
+<p>Note that I have added the dependecies.</p>
+
+<p>At this point we need to generate our handler.</p>
+
+<div class="highlight highlight-clojure"><pre><span class="p">(</span><span class="kd">ns </span><span class="nv">awesome-name.core</span>
+  <span class="p">(</span><span class="ss">:require</span> <span class="p">[</span><span class="nv">ema.core</span> <span class="ss">:refer</span> <span class="p">[</span><span class="nv">ema</span><span class="p">]]</span>
+            <span class="p">[</span><span class="nv">org.httpkit.server</span> <span class="ss">:refer</span> <span class="p">[</span><span class="nv">run-server</span><span class="p">]]))</span>
+
+<span class="p">(</span><span class="k">def </span><span class="nv">setting</span>
+  <span class="p">{</span><span class="ss">:key</span> <span class="ss">:mongo</span>
+   <span class="ss">:handler</span> <span class="ss">:bidi</span>
+   <span class="ss">:uri</span> <span class="s">"mongodb://localhost:27017"</span>
+   <span class="ss">:database</span> <span class="s">"ema"</span>
+   <span class="ss">:resources</span> <span class="p">[{</span><span class="ss">:key</span> <span class="ss">:mongo</span>
+                <span class="ss">:name</span> <span class="s">"user"</span>
+                <span class="ss">:auth</span> <span class="ss">:first</span>
+                <span class="ss">:item-mth</span> <span class="p">[</span><span class="ss">:patch</span> <span class="ss">:delete</span> <span class="ss">:post</span><span class="p">]</span> <span class="c1">;; no `put`</span>
+                <span class="ss">:collection-mth</span> <span class="p">[</span><span class="ss">:post</span><span class="p">]</span>
+                <span class="ss">:public-item-mth</span> <span class="p">[</span><span class="ss">:get</span><span class="p">]</span>
+                <span class="ss">:public-collection-mth</span> <span class="p">[</span><span class="ss">:get</span> <span class="ss">:post</span><span class="p">]}</span>
+               <span class="p">{</span><span class="ss">:key</span> <span class="ss">:mongo</span>
+                <span class="ss">:auth</span> <span class="ss">:first</span>
+                <span class="ss">:database</span> <span class="s">"test"</span> 
+                <span class="ss">:name</span> <span class="s">"session"</span>
+                <span class="ss">:item-mth</span> <span class="p">[</span><span class="ss">:put</span><span class="p">]</span> <span class="c1">;; no `get`, `patch` nor `delete`</span>
+                <span class="ss">:collection-mth</span> <span class="p">[</span><span class="ss">:post</span><span class="p">]</span>
+                <span class="ss">:public-collection-mth</span> <span class="p">[</span><span class="ss">:get</span><span class="p">]}]</span>
+   <span class="ss">:auth</span> <span class="p">{</span><span class="ss">:first</span> <span class="p">{</span><span class="ss">:key</span> <span class="ss">:mongo-dynamics</span>
+                  <span class="ss">:database</span> <span class="s">"ema"</span>
+                  <span class="ss">:name</span> <span class="s">"user"</span>
+                  <span class="ss">:username</span> <span class="ss">:username</span>
+                  <span class="ss">:password</span> <span class="ss">:password</span>
+                  <span class="ss">:security</span> <span class="ss">:dynamic</span><span class="p">}}})</span>
+
+<span class="p">(</span><span class="k">def </span><span class="nv">app</span>
+  <span class="p">(</span><span class="nf">ema</span> <span class="nv">setting</span><span class="p">))</span>
+
+<span class="p">(</span><span class="kd">defn </span><span class="nv">-main</span> <span class="p">[]</span>
+  <span class="p">(</span><span class="nf">run-server</span> <span class="nv">app</span> <span class="p">{</span><span class="ss">:port</span> <span class="mi">8000</span><span class="p">}))</span>
+
+</pre></div>
+
+<p>Now you need to run an instance of MongoDB in your machine, or just change the <code>uri</code> key in something more appropriate, like the url of a cloud instance of MongoDB.</p>
+
+<p>Now run the following in your console</p>
+
+<div class="highlight highlight-bash"><pre><span class="nb">cd</span>
+<span class="nb">cd</span> /awesome-name
+lein run
+</pre></div>
+
+<p>and you should be ready to go.</p>
+
+<p>Now, if everything went smootly you are serving two REST resource, <code>user</code> and <code>session</code>.</p>
+
+<p>Please note the configuration: you won't be able to <code>put</code> on <code>user</code> nor you will be able to <code>get</code>, <code>patch</code> and <code>delete</code> a single <code>session</code>.</p>
+
+<p>Of course you can change that.</p>
+
+<p>Also, <code>user</code> and <code>session</code> are not in the same database (in the mongodb meaning).</p>
+
+<p><code>user</code> is in the "ema" database while <code>session</code> is in the "session" database.</p>
+
+<p>If you add other collections, let say <code>author</code> and <code>book</code></p>
+
+<div class="highlight highlight-clojure"><pre><span class="p">{</span>
+ <span class="ss">:name</span> <span class="s">"authors"</span>
+ <span class="ss">:collection-entries</span> <span class="p">[</span><span class="ss">:post</span> <span class="ss">:get</span><span class="p">]</span>
+ <span class="ss">:list-entries</span> <span class="p">[</span><span class="ss">:get</span> <span class="ss">:put</span> <span class="ss">:patch</span><span class="p">]</span>
+<span class="p">}</span>
+<span class="p">{</span>
+ <span class="ss">:name</span> <span class="s">"book"</span>
+ <span class="ss">:database</span> <span class="s">"another-database"</span>
+ <span class="ss">:collection-entries</span> <span class="p">[</span><span class="ss">:post</span> <span class="ss">:get</span><span class="p">]</span>
+ <span class="ss">:list-entries</span> <span class="p">[</span><span class="ss">:get</span> <span class="ss">:put</span> <span class="ss">:patch</span><span class="p">]</span>
+<span class="p">}</span> 
+</pre></div>
+
+<p><code>author</code> will be under the "ema" database while <code>book</code> will write in the "another-database".</p>
+
+<div class="highlight highlight-bash"><pre>simo@simo:~/ema<span class="nv">$ </span>curl -X POST -d <span class="s2">"{\"siscia\" : \"pass\"}"</span> http://localhost:3000/user
+<span class="o">{</span><span class="s2">"siscia"</span>:<span class="s2">"pass"</span>,<span class="s2">"_id"</span>:<span class="s2">"5423934fc8300b83ff02e5fe"</span><span class="o">}</span>
+simo@simo:~/ema<span class="nv">$ </span>curl  http://localhost:3000/user
+<span class="o">{</span><span class="s2">"data"</span>:<span class="o">[{</span><span class="s2">"_id"</span>:<span class="s2">"5423934fc8300b83ff02e5fe"</span>,<span class="s2">"siscia"</span>:<span class="s2">"pass"</span><span class="o">}]}</span>
+</pre></div>
+
+<h2>
+<a name="docker" class="anchor" href="#docker"><span class="octicon octicon-link"></span></a>Docker</h2>
+
+<p>I also have packed ema itself as a Docker.</p>
+
+<p>You still need a configuration file in .edn format (a clojure map).</p>
+
+<p>Suppose you have save the configuration file in <code>~/ema/config.edn</code> to run the docker you need to run the following.</p>
+
+<div class="highlight highlight-bash"><pre>sudo docker run --net<span class="o">=</span><span class="s2">"host"</span> -v ~/ema/:/ema siscia/ema:latest <span class="s2">"/ema/config.edn"</span> 
+</pre></div>
+
+<p>And you should be running.</p>
+
+<h2>
+<a name="keep-it-small" class="anchor" href="#keep-it-small"><span class="octicon octicon-link"></span></a>Keep it small</h2>
+
+<p><code>ema</code> has a lot of dependecies, most of them necessaries.</p>
+
+<p>If you develop a web app it may be possible that your code has some common dependencies with <code>ema</code> itself.</p>
+
+<p>I am thinking about libraries like <code>http-kit</code> or <code>monger</code>.</p>
+
+<p>If this is the case, right now, you could just exclude such dependencies from <code>ema</code>.</p>
+
+<p>Taking as example the previous <code>project.clj</code>, it could be written as:</p>
+
+<div class="highlight highlight-clojure"><pre><span class="p">(</span><span class="kd">defproject </span><span class="nv">awesome-name</span> <span class="s">"0.1.0-SNAPSHOT"</span>
+  <span class="ss">:description</span> <span class="s">"FIXME: write description"</span>
+  <span class="ss">:url</span> <span class="s">"http://example.com/FIXME"</span>
+  <span class="ss">:license</span> <span class="p">{</span><span class="ss">:name</span> <span class="s">"Eclipse Public License"</span>
+            <span class="ss">:url</span> <span class="s">"http://www.eclipse.org/legal/epl-v10.html"</span><span class="p">}</span>
+  <span class="ss">:dependencies</span> <span class="p">[[</span><span class="nv">org.clojure/clojure</span> <span class="s">"1.6.0"</span><span class="p">]</span>
+                 <span class="p">[</span><span class="nv">ema</span> <span class="s">"0.0.8"</span> <span class="ss">:exclusions</span> <span class="p">[[</span><span class="nv">http-kit</span><span class="p">]]]</span> <span class="c1">;; added the exclusion</span>
+                 <span class="p">[</span><span class="nv">http-kit</span> <span class="s">"2.1.19"</span><span class="p">]]</span>  <span class="c1">;; you already have imported an http-kit</span>
+  <span class="ss">:main</span> <span class="nv">awesome-name.core</span><span class="p">)</span>             
+
+</pre></div>
+
+<p>As long as you keep your dependecies up to date this approach will work fine.</p>
+
+<h2>
+<a name="issues" class="anchor" href="#issues"><span class="octicon octicon-link"></span></a>Issues</h2>
+
+<p>For any problem, if you don't find the doc clear or for really anything you can just open an issue here.</p>
+
+<h2>
+<a name="contributing" class="anchor" href="#contributing"><span class="octicon octicon-link"></span></a>Contributing</h2>
+
+<p>As always contributing is very much welcome. Just send a Pull Request or Open an Issue.</p>
+
+<h2>
+<a name="license" class="anchor" href="#license"><span class="octicon octicon-link"></span></a>License</h2>
+
+<p>Copyright © 2014 Simone Mosciatti</p>
+
+<p>Distributed under the Eclipse Public License either version 1.0</p>
+
+<h2>
+<a name="thanks" class="anchor" href="#thanks"><span class="octicon octicon-link"></span></a>Thanks</h2>
+
+<p>Thanks to Emanuela Furfaro for being my inspiration.</p>
+        </section>
+
+        <aside id="sidebar">
+          <a href="https://github.com/siscia/ema/zipball/master" class="button">
+            <small>Download</small>
+            .zip file
+          </a>
+          <a href="https://github.com/siscia/ema/tarball/master" class="button">
+            <small>Download</small>
+            .tar.gz file
+          </a>
+
+          <p class="repo-owner"><a href="https://github.com/siscia/ema"></a> is maintained by <a href="https://github.com/siscia">siscia</a>.</p>
+
+          <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
+        </aside>
+      </div>
+    </div>
+
+  
+  </body>
+</html>
