@@ -3,7 +3,7 @@
             [cheshire.core :refer [parse-string generate-string]]
             [cheshire.generate :refer [add-encoder encode-str]]
 
-            [ema.implementation :refer [authentication connect-resource]])
+            [ema.implementation :refer [authentication]])
   (:import org.bson.types.ObjectId))
 
 ;; Dictionary:
@@ -19,6 +19,9 @@
       [true {::malformed-message (str "ID: \"" id "\" not valid. Please check: http://api.mongodb.org/java/2.0/org/bson/types/ObjectId.html")}]))
 
 (add-encoder org.bson.types.ObjectId encode-str)
+
+(defn connect-resource [a b]
+  ( (get-in a [:meta :f]) b))
 
 (defn parse-json-malformed [ctx k]
   (when (#{:put :post :patch} (get-in ctx [:request :request-method]))

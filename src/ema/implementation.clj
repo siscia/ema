@@ -139,48 +139,59 @@ Custom authentication layer are suppose to provide an implementation."
   "Given a name (string) and a seq of resource-definition, find the resource definition with the given name."
   (first (filter #(= (:name %) name) resources-def)))
 
-(defn links-creator [conns res-defs]
-  (let [create-link
-        (fn [conn res]
-          (println "conn:> " conn)
-          (println "res:> " res)
-          (if-let [id (get res (:field conn))]
-            (let [_ (println "id:>" id)
-                  res-conn (-> conn
-                               :resource
-                               (find-resorces-def res-defs))
-                  basic-get (get-in res-conn [:meta :basic-get])
-                  ;;next-conn (get conns (:resource conn))
-                  ;;next-resource #(create-link next-conn (basic-get %))
-                  ]
-              (assoc res (:field conn) (if (sequential? id)
-                                         (mapv basic-get id)
-                                         (basic-get id))))
-            res))]
-    
-    (map (fn [conn] (partial create-link conn)) conns)))
+(defn res-defs-to-link-def [res-defs]
+  "Return a map with key the name of a resource and with value a function to return the resource itself, given the id."
+  (reduce (fn [m res-def]
+            (assoc m
+              (:name res-def)
+              (get-in res-def [:meta :basic-get])))
+          {} res-defs))
 
-(defn add-connections [res-defs {:keys [connections] :as entry-map}]
-  (map (fn [res-def]
-         (let [conns (get connections (:name res-def))
-               links (links-creator conns res-defs)]
-           (assoc-in res-def
-                     [:meta :links-creator]
-                     links))) res-defs))
+;; (defn create-full-link [resource links]
+;;   (letfn [(complete-link [r link]
+;;             (let [field (:field link)]
+;;               (assoc r
+;;                 field
+;;                 {:resource (:resource link)
+;;                  :id (field r)})))]
+;;     (reduce (fn [r l]
+;;               (complete-link r l)) resource links)))
 
-(defn connect-resource [res-def resource]
-  (println resource)
-  (let [fs-connect (get-in res-def [:meta :links-creator])
-        f (apply comp fs-connect)]
-    (when f
-      (do
-        (println (f resource))
-        (f resource)))))
+(defn get-rsr [id fn]
+  (println id fn)
+  (if id
+    (if (sequential? id)
+      (map fn id)
+      (fn id))
+    nil))
+
+(defn create-full-link [resource links link-defs]
+  (letfn [(complete-link [r link]
+            (let [field (:field link)
+                  resource (:resource link)
+                  id (field r)
+                  link (get-rsr id (link-defs resource))]
+              (assoc r
+                field link)))]
+    (reduce (fn [r l]
+              (complete-link r l)) resource links)))
+
+(defn linker [{:keys [links] :as entry-map} link-defs res-def]
+  (let [f (fn [res-name rsr]
+                (let [link-to-follow (get links res-name)
+                      rsr (create-full-link rsr (get links res-name) link-defs)]
+                  rsr))]
+    (assoc-in res-def
+              [:meta :f]
+              (partial f (:name res-def)))))
 
 ;;(t/ann generate-resource-definition [EntryMap -> (t/Seq ResourceDefinition)])
 (defn generate-resource-definition
   "Given an entry-map the function will return a sequence of resource-definition."
-  [{:keys [resources] :as entry-map}]
-  (let [res-def (map (define-resource entry-map) resources)
-        linked-res (add-connections res-def entry-map)]
-    linked-res))
+  [{:keys [resources links] :as entry-map}]
+  (let [res-defs (map (define-resource entry-map) resources)
+        link-def (res-defs-to-link-def res-defs)
+        a (map #(linker entry-map link-def %) res-defs)]
+    (doseq [l a]
+      (println l "\n"))
+    a))

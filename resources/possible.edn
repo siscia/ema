@@ -3,11 +3,13 @@
  :uri "mongodb://localhost:27017"
  :database "ema"
  
- :connections {"user" [{:resource "session"
-                        :field :sessionID}
-                       {:resource "session"
-                        :field :storicSessionsID
-                        :type :list}]}
+ :links {"user" [{:resource "session"
+                  :field :sessionID}
+                 {:resource "session"
+                  :field :storicSessionsID
+                  :type :list}]
+         "session" [{:resource "image"
+                     :field :image-session}]}
  
  :resources [{:key :mongo
               :name "user"
